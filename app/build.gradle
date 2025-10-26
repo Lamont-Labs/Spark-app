@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.application'
+    id 'com.facebook.react'
+}
+
+android {
+    namespace "com.lamontlabs.spark"
+    compileSdkVersion 35
+
+    defaultConfig {
+        applicationId "com.lamontlabs.spark"
+        minSdkVersion 26
+        targetSdkVersion 35
+        versionCode 23
+        versionName "2.3.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("keystore/spark-release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "TBD"
+            keyAlias "spark"
+            keyPassword System.getenv("KEY_PASSWORD") ?: "TBD"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.facebook.react:react-android:0.76.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
+}
