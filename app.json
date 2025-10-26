@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Spark",
+    "slug": "spark",
+    "scheme": "spark",
+    "version": "2.3.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B1020"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "updates": { "enabled": false },
+    "plugins": [
+      "expo-sqlite",
+      "./plugins/remove-internet-permission"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lamontlabs.spark"
+    },
+    "android": {
+      "package": "com.lamontlabs.spark",
+      "versionCode": 23,
+      "permissions": [],
+      "intentFilters": [],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0B1020"
+      }
+    },
+    "extra": { "eas": { "projectId": "SPARK-OFFLINE-PROJ" } }
+  }
+}
