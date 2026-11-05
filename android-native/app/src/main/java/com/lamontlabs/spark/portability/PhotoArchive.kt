@@ -9,7 +9,6 @@ import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.File
-import java.security.MessageDigest
 import java.time.LocalDate
 import java.util.UUID
 import java.util.zip.ZipEntry
@@ -144,8 +143,8 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
             for (id in requiredPhotos) {
                 val source = staged[id] ?: error("Missing photo")
                 val target = photos.newPhotoFile(id)
-                require(source.copyTo(target, overwrite = false).length() == source.length()) { "Photo copy failed" }
                 installed.add(id)
+                require(source.copyTo(target, overwrite = false).length() == source.length()) { "Photo copy failed" }
             }
             val inserted = dao.insertIfAbsent(newRows)
             val insertedIds = newRows.filterIndexed { index, _ -> inserted[index] != -1L }
