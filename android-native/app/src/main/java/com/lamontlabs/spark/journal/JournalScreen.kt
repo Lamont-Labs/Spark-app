@@ -51,6 +51,9 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(reflection.body, style = MaterialTheme.typography.bodyLarge)
+                    reflection.mood?.let { selectedMood ->
+                        Text("Felt: $selectedMood", style = MaterialTheme.typography.labelMedium)
+                    }
                 }
             }
         }
