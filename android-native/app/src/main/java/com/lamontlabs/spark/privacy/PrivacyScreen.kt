@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.lamontlabs.spark.data.ReflectionRepository
 import com.lamontlabs.spark.data.SparkDatabase
 import com.lamontlabs.spark.portability.ReflectionBackup
+import com.lamontlabs.spark.portability.PhotoArchive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.rememberScrollState
@@ -55,6 +56,7 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
 
     val context = LocalContext.current
     val backup = remember(context) { ReflectionBackup(SparkDatabase.get(context).reflectionDao()) }
+    val photoArchive = remember(context) { PhotoArchive(context, SparkDatabase.get(context).reflectionDao()) }
     var message by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     val exportPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
@@ -84,6 +86,32 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
                 }
                 message = "Imported ${result.imported} reflections; skipped ${result.skippedExisting} existing entries."
             } catch (exception: Exception) { message = "Import failed: ${exception.message}" }
+            finally { busy = false }
+        }
+    }
+    val photoExportPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        if (uri != null) scope.launch {
+            busy = true
+            try {
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri)?.use { photoArchive.exportTo(it) }
+                        ?: error("Unable to open destination")
+                }
+                message = "Photo archive exported. ZIP is unencrypted; store it privately."
+            } catch (exception: Exception) { message = "Photo export failed: ${exception.message}" }
+            finally { busy = false }
+        }
+    }
+    val photoImportPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            busy = true
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.use { photoArchive.importFrom(it) }
+                        ?: error("Unable to open archive")
+                }
+                message = "Restored ${result.imported} reflections with photos; skipped ${result.skippedExisting} existing entries."
+            } catch (exception: Exception) { message = "Photo restore failed: ${exception.message}" }
             finally { busy = false }
         }
     }
@@ -125,7 +153,11 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
             }
         })
         Text(if (remindersEnabled) "Reminders enabled" else "Reminders off", style = MaterialTheme.typography.bodySmall)
-        Text("Manual text backup (unencrypted)", style = MaterialTheme.typography.titleMedium)
+        Text("Complete backup with photos (unencrypted ZIP)", style = MaterialTheme.typography.titleMedium)
+        Text("Includes reflection text and private photo files. Keep this ZIP somewhere secure. Existing entries are never overwritten.", style = MaterialTheme.typography.bodySmall)
+        Button(onClick = { photoExportPicker.launch("spark-complete-backup.zip") }, enabled = !busy) { Text("Export complete backup") }
+        OutlinedButton(onClick = { photoImportPicker.launch(arrayOf("application/zip", "application/octet-stream")) }, enabled = !busy) { Text("Restore complete backup") }
+        Text("Legacy text-only backup (unencrypted)", style = MaterialTheme.typography.titleMedium)
         Text("Backups contain private journal text. Photos are not included. Export refuses photo-only entries. Import never overwrites matching IDs.", style = MaterialTheme.typography.bodySmall)
         Button(onClick = { exportPicker.launch("spark-reflections.json") }, enabled = !busy) { Text("Export reflections") }
         OutlinedButton(onClick = { importPicker.launch(arrayOf("application/json", "text/plain")) }, enabled = !busy) { Text("Import reflections") }
