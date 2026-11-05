@@ -25,6 +25,7 @@ import com.lamontlabs.spark.editor.ReflectionEditor
 import com.lamontlabs.spark.journal.JournalScreen
 import com.lamontlabs.spark.affirm.AffirmScreen
 import com.lamontlabs.spark.progress.ProgressScreen
+import com.lamontlabs.spark.resurface.ResurfacingCard
 import com.lamontlabs.spark.design.SparkMoment
 import com.lamontlabs.spark.design.SparkMomentCard
 
@@ -58,7 +59,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
         }
     ) { padding ->
         when (destination) {
-            Destination.TODAY -> TodayDestination(Modifier.padding(padding), onEdit = { editingKind = it })
+            Destination.TODAY -> TodayDestination(repository, Modifier.padding(padding), onEdit = { editingKind = it })
             Destination.JOURNAL -> JournalScreen(repository, Modifier.padding(padding))
             Destination.AFFIRM -> AffirmScreen(Modifier.padding(padding))
             Destination.YOU -> ProgressScreen(repository, Modifier.padding(padding))
@@ -67,7 +68,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
 }
 
 @Composable
-private fun TodayDestination(modifier: Modifier, onEdit: (String) -> Unit) {
+private fun TodayDestination(repository: ReflectionRepository, modifier: Modifier, onEdit: (String) -> Unit) {
     val moments = listOf(
         SparkMoment("Gratitude", "What brought a little light into your day?"),
         SparkMoment("Daily Win", "What deserves a little credit today?"),
@@ -97,6 +98,7 @@ private fun TodayDestination(modifier: Modifier, onEdit: (String) -> Unit) {
                 )
             }
         }
+        item { ResurfacingCard(repository) }
         item { Text("Tap Gratitude or Daily Win to write a private reflection.", style = MaterialTheme.typography.bodySmall) }
     }
 }
