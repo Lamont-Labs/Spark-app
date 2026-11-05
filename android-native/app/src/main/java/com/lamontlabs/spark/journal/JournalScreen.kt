@@ -28,7 +28,8 @@ import com.lamontlabs.spark.data.ReflectionRepository
 
 @Composable
 fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifier) {
-    val photoStore = remember(LocalContext.current) { PrivatePhotoStore(LocalContext.current) }
+    val context = LocalContext.current
+    val photoStore = remember(context) { PrivatePhotoStore(context) }
     val stream = remember(repository) { repository.observeAll() }
     val reflections by stream.collectAsState(initial = emptyList())
     LazyColumn(
