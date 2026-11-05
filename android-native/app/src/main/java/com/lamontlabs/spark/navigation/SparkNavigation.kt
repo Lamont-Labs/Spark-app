@@ -24,6 +24,7 @@ import com.lamontlabs.spark.data.ReflectionRepository
 import com.lamontlabs.spark.editor.ReflectionEditor
 import com.lamontlabs.spark.journal.JournalScreen
 import com.lamontlabs.spark.affirm.AffirmScreen
+import com.lamontlabs.spark.progress.ProgressScreen
 import com.lamontlabs.spark.design.SparkMoment
 import com.lamontlabs.spark.design.SparkMomentCard
 
@@ -60,9 +61,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
             Destination.TODAY -> TodayDestination(Modifier.padding(padding), onEdit = { editingKind = it })
             Destination.JOURNAL -> JournalScreen(repository, Modifier.padding(padding))
             Destination.AFFIRM -> AffirmScreen(Modifier.padding(padding))
-            Destination.YOU -> EmptyDestination(
-                "Your space", "Privacy, preferences, and your Spark settings.", Modifier.padding(padding)
-            )
+            Destination.YOU -> ProgressScreen(repository, Modifier.padding(padding))
         }
     }
 }
