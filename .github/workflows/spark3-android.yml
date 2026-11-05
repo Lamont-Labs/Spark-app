@@ -1,4 +1,4 @@
-name: Spark 3 Android foundation
+name: Spark 3 Android verification
 on:
   push:
     branches:
@@ -32,11 +32,35 @@ jobs:
       - name: Compile debug APK
         working-directory: android-native
         run: gradle --no-daemon :app:assembleDebug
-      - name: SHA-256
-        run: sha256sum android-native/app/build/outputs/apk/debug/app-debug.apk
+      - name: Verify APK package, privacy and debug signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android-native/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          AAPT="$ANDROID_HOME/build-tools/35.0.0/aapt"
+          SIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          "$AAPT" dump badging "$APK" | grep -F "com.lamontlabs.spark"
+          if "$AAPT" dump permissions "$APK" | grep -F "android.permission.INTERNET"; then
+            echo "Unexpected INTERNET permission in offline Spark build" >&2
+            exit 1
+          fi
+          "$SIGNER" verify --verbose "$APK"
+          "$AAPT" dump xmltree "$APK" AndroidManifest.xml > /tmp/spark-manifest.txt
+          grep -F "allowBackup" /tmp/spark-manifest.txt
+          grep -F "0x0" /tmp/spark-manifest.txt > /dev/null
+      - name: Write APK checksum
+        shell: bash
+        run: |
+          cd android-native/app/build/outputs/apk/debug
+          sha256sum app-debug.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
       - name: Publish installable test APK
         uses: actions/upload-artifact@v4
         with:
           name: spark3-debug-apk
-          path: android-native/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            android-native/app/build/outputs/apk/debug/app-debug.apk
+            android-native/app/build/outputs/apk/debug/SHA256SUMS.txt
+          retention-days: 30
           if-no-files-found: error
