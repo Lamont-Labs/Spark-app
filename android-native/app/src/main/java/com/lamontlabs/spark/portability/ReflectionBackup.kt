@@ -14,6 +14,7 @@ import java.util.UUID
 class ReflectionBackup(private val dao: ReflectionDao) {
     suspend fun exportJson(): String {
         val rows = dao.snapshotAll()
+        require(rows.none { it.body.isBlank() }) { "Photo-only reflections cannot be exported without photo backup support" }
         val items = JSONArray()
         for (r in rows) {
             items.put(JSONObject().apply {
@@ -51,7 +52,6 @@ class ReflectionBackup(private val dao: ReflectionDao) {
             require(seen.add(id)) { "Duplicate reflection ID in backup" }
             val date = item.getString("reflection_date")
             require(LocalDate.parse(date).toString() == date) { "Invalid reflection date" }
-            val photoId = item.optString("photo_id").takeUnless { it.isBlank() || it == "null" }
             // Never create broken photo references: a text-only import drops photo metadata.
             val body = item.getString("body")
             require(body.isNotBlank()) { "Photo-only entries cannot be restored without photo bytes" }
