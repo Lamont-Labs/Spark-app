@@ -2,9 +2,13 @@ package com.lamontlabs.spark.editor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -30,6 +34,7 @@ fun ReflectionEditor(
     onCancel: () -> Unit
 ) {
     var body by rememberSaveable(kind) { mutableStateOf("") }
+    var mood by rememberSaveable(kind) { mutableStateOf<String?>(null) }
     var saving by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -57,6 +62,20 @@ fun ReflectionEditor(
             modifier = Modifier.fillMaxWidth(),
             enabled = !saving
         )
+        Text("How did this moment feel? (optional)", style = MaterialTheme.typography.labelLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf("Calm", "Happy", "Proud", "Hopeful", "Tough").forEach { option ->
+                FilterChip(
+                    selected = mood == option,
+                    onClick = { mood = if (mood == option) null else option },
+                    label = { Text(option) },
+                    enabled = !saving
+                )
+            }
+        }
         if (error != null) {
             Text(error!!, color = MaterialTheme.colorScheme.error)
         }
@@ -68,7 +87,7 @@ fun ReflectionEditor(
                     saving = true
                     scope.launch {
                         try {
-                            repository.create(kind, body, LocalDate.now(), promptId = prompt?.id)
+                            repository.create(kind, body, LocalDate.now(), mood = mood, promptId = prompt?.id)
                             onSaved()
                         } catch (exception: Exception) {
                             error = "Could not save. Your text is still here; please retry."
