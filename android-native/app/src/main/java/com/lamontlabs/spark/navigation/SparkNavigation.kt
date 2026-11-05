@@ -1,6 +1,7 @@
 package com.lamontlabs.spark.navigation
 
-import androidx.compose.foundation.clickable\nimport androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +20,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.lamontlabs.spark.data.ReflectionRepository\nimport com.lamontlabs.spark.editor.ReflectionEditor\nimport com.lamontlabs.spark.design.SparkMoment
+import com.lamontlabs.spark.data.ReflectionRepository
+import com.lamontlabs.spark.editor.ReflectionEditor
+import com.lamontlabs.spark.design.SparkMoment
 import com.lamontlabs.spark.design.SparkMomentCard
 
 private enum class Destination(val label: String) {
@@ -27,9 +30,14 @@ private enum class Destination(val label: String) {
 }
 
 @Composable
-fun SparkNavigation(repository: ReflectionRepository) {\n    var editingKind by rememberSaveable { mutableStateOf<String?>(null) }
+fun SparkNavigation(repository: ReflectionRepository) {
+    var editingKind by rememberSaveable { mutableStateOf<String?>(null) }
     var selected by rememberSaveable { mutableStateOf(Destination.TODAY.name) }
     val destination = Destination.entries.firstOrNull { it.name == selected } ?: Destination.TODAY
+    if (editingKind != null) {
+        ReflectionEditor(kind = editingKind!!, repository = repository, onSaved = { editingKind = null }, onCancel = { editingKind = null })
+        return
+    }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
@@ -80,7 +88,18 @@ private fun TodayDestination(modifier: Modifier, onEdit: (String) -> Unit) {
                 Text("There's something worth noticing.", style = MaterialTheme.typography.bodyLarge)
             }
         }
-        items(moments, key = { it.title }) { moment ->\n            if (moment.title == "Affirmation") {\n                SparkMomentCard(moment)\n            } else {\n                SparkMomentCard(\n                    moment,\n                    modifier = Modifier.clickable {\n                        onEdit(if (moment.title == "Gratitude") "GRATITUDE" else "WIN")\n                    }\n                )\n            }\n        }
+        items(moments, key = { it.title }) { moment ->
+            if (moment.title == "Affirmation") {
+                SparkMomentCard(moment)
+            } else {
+                SparkMomentCard(
+                    moment,
+                    modifier = Modifier.clickable {
+                        onEdit(if (moment.title == "Gratitude") "GRATITUDE" else "WIN")
+                    }
+                )
+            }
+        }
         item { Text("Tap Gratitude or Daily Win to write a private reflection.", style = MaterialTheme.typography.bodySmall) }
     }
 }
