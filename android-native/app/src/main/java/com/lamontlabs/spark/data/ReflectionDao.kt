@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -11,6 +12,7 @@ interface ReflectionDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(reflection: ReflectionEntity)
 
+    @Transaction
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfAbsent(reflections: List<ReflectionEntity>): List<Long>
 
