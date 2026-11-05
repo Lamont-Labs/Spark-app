@@ -1,8 +1,13 @@
 package com.lamontlabs.spark.privacy
 
+import android.Manifest
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.FilterChip
+import com.lamontlabs.spark.reminders.ReminderScheduler
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +36,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier) {
     val enabled by preferences.resurfacingEnabled.collectAsState(initial = false)
+    val remindersEnabled by preferences.remindersEnabled.collectAsState(initial = false)
+    val reminderHour by preferences.reminderHour.collectAsState(initial = 19)
     val scope = rememberCoroutineScope()
+    val contextForReminders = LocalContext.current
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) scope.launch {
+            preferences.setRemindersEnabled(true)
+            ReminderScheduler.configure(contextForReminders, true, reminderHour)
+        }
+    }
+
     val context = LocalContext.current
     val backup = remember(context) { ReflectionBackup(SparkDatabase.get(context).reflectionDao()) }
     var message by remember { mutableStateOf<String?>(null) }
@@ -83,6 +98,27 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
             Switch(checked = enabled, onCheckedChange = { next -> scope.launch { preferences.setResurfacingEnabled(next) } })
         }
         Text("No account or cloud sync is required. This setting stays on your device.", style = MaterialTheme.typography.bodySmall)
+        Text("Gentle daily reminder", style = MaterialTheme.typography.titleMedium)
+        Text("Optional, local and never includes your journal text. Delivery time is approximate.", style = MaterialTheme.typography.bodySmall)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(9 to "Morning", 14 to "Afternoon", 19 to "Evening").forEach { (hour, label) ->
+                FilterChip(selected = reminderHour == hour, onClick = {
+                    scope.launch {
+                        preferences.setReminderHour(hour)
+                        if (remindersEnabled) ReminderScheduler.configure(context, true, hour)
+                    }
+                }, label = { Text(label) })
+            }
+        }
+        Switch(checked = remindersEnabled, onCheckedChange = { next ->
+            if (next && Build.VERSION.SDK_INT >= 33) {
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else scope.launch {
+                preferences.setRemindersEnabled(next)
+                ReminderScheduler.configure(context, next, reminderHour)
+            }
+        })
+        Text(if (remindersEnabled) "Reminders enabled" else "Reminders off", style = MaterialTheme.typography.bodySmall)
         Text("Manual text backup (unencrypted)", style = MaterialTheme.typography.titleMedium)
         Text("Backups contain private journal text. Photos are not included. Export refuses photo-only entries. Import never overwrites matching IDs.", style = MaterialTheme.typography.bodySmall)
         Button(onClick = { exportPicker.launch("spark-reflections.json") }, enabled = !busy) { Text("Export reflections") }
