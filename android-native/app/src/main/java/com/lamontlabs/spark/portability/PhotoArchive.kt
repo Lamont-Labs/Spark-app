@@ -9,6 +9,7 @@ import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.File
+import java.security.MessageDigest
 import java.time.LocalDate
 import java.util.UUID
 import java.util.zip.ZipEntry
@@ -23,6 +24,19 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
     private val photos = PrivatePhotoStore(context)
     private val maxPhoto = 15L * 1024 * 1024
     private val maxArchive = 200L * 1024 * 1024
+
+    private fun sha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(8192)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                digest.update(buffer, 0, count)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
 
     suspend fun exportTo(output: OutputStream) {
         val rows = dao.snapshotAll()
@@ -45,8 +59,10 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
                 put("photo_id", row.photoId ?: JSONObject.NULL); put("schema_version", row.schemaVersion)
             })
         }
+        val checksums = JSONObject()
+        for ((id, file) in photoFiles) checksums.put(id, sha256(file))
         val root = JSONObject().put("format", "spark-photo-archive").put("version", 1)
-            .put("reflections", manifest)
+            .put("reflections", manifest).put("photo_sha256", checksums)
         val bytes = root.toString().toByteArray(Charsets.UTF_8)
         require(bytes.size <= 5_000_000) { "Manifest exceeds 5 MB" }
         var total = bytes.size.toLong()
@@ -110,6 +126,7 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
             require(root.getString("format") == "spark-photo-archive" && root.getInt("version") == 1) {
                 "Unsupported photo archive"
             }
+            val checksums = root.getJSONObject("photo_sha256")
             val array = root.getJSONArray("reflections")
             require(array.length() <= 10_000) { "Too many reflections" }
             val ids = HashSet<String>()
@@ -135,6 +152,15 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
                 )
             }
             require(staged.keys == referenced) { "Photo entries do not match manifest" }
+            val checksumKeys = HashSet<String>()
+            val iterator = checksums.keys()
+            while (iterator.hasNext()) checksumKeys.add(iterator.next())
+            require(checksumKeys == referenced) { "Photo checksum list does not match manifest" }
+            for (id in referenced) {
+                val expected = checksums.getString(id)
+                require(Regex("[0-9a-f]{64}").matches(expected)) { "Invalid photo checksum" }
+                require(sha256(staged[id] ?: error("Missing photo")) == expected) { "Corrupted photo bytes" }
+            }
             val newRows = rows.filter { dao.findById(it.id) == null }
             val requiredPhotos = newRows.mapNotNull { it.photoId }.toSet()
             for (id in requiredPhotos) {
