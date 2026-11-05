@@ -43,6 +43,16 @@ class PrivatePhotoStore(context: Context) {
         }
     }
 
+    /** Restore destination restricted to the private photo directory. */
+    fun newPhotoFile(id: String): File {
+        UUID.fromString(id)
+        require(!directory.exists() || directory.isDirectory) { "Invalid photo directory" }
+        require(directory.exists() || directory.mkdirs()) { "Cannot create photo directory" }
+        val target = File(directory, "$id.jpg")
+        require(!target.exists()) { "Photo already exists" }
+        return target
+    }
+
     fun fileFor(id: String): File? {
         if (!Regex("[0-9a-fA-F-]{36}").matches(id)) return null
         return File(directory, "$id.jpg").takeIf { it.isFile }
