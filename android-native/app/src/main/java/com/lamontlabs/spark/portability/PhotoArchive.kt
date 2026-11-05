@@ -127,6 +127,7 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
             require(root.getString("format") == "spark-photo-archive") { "Unsupported photo archive format" }
             val version = root.getInt("version")
             require(version == 1 || version == 2) { "Unsupported photo archive version" }
+            require(version != 1 || !root.has("photo_sha256")) { "Unexpected checksums in legacy archive" }
             val checksums = if (version == 2) root.getJSONObject("photo_sha256") else null
             val array = root.getJSONArray("reflections")
             require(array.length() <= 10_000) { "Too many reflections" }
