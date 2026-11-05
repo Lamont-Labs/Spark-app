@@ -18,6 +18,12 @@ import com.lamontlabs.spark.data.SparkDatabase
 import com.lamontlabs.spark.portability.ReflectionBackup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,7 +88,7 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
         }
     }
     Column(
-        modifier = modifier.padding(24.dp),
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text("Privacy & preferences", style = MaterialTheme.typography.headlineMedium)
@@ -123,7 +129,7 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
         Text("Backups contain private journal text. Photos are not included. Export refuses photo-only entries. Import never overwrites matching IDs.", style = MaterialTheme.typography.bodySmall)
         Button(onClick = { exportPicker.launch("spark-reflections.json") }, enabled = !busy) { Text("Export reflections") }
         OutlinedButton(onClick = { importPicker.launch(arrayOf("application/json", "text/plain")) }, enabled = !busy) { Text("Import reflections") }
-        message?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        message?.let { Text(it, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }, style = MaterialTheme.typography.bodySmall) }
         Text("Uninstalling Spark may erase locally stored reflections. Keep backups somewhere you control.", style = MaterialTheme.typography.bodySmall)
     }
 }
