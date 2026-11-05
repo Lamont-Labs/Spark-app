@@ -1,6 +1,16 @@
 package com.lamontlabs.spark.navigation
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -67,7 +77,17 @@ fun SparkNavigation(repository: ReflectionRepository) {
                     NavigationBarItem(
                         selected = destination == item,
                         onClick = { selected = item.name },
-                        icon = { Text(item.label.take(1), style = MaterialTheme.typography.labelLarge) },
+                        icon = {
+                            Icon(
+                                imageVector = when (item) {
+                                    Destination.TODAY -> Icons.Filled.Home
+                                    Destination.JOURNAL -> Icons.Filled.List
+                                    Destination.AFFIRM -> Icons.Filled.Favorite
+                                    Destination.YOU -> Icons.Filled.Person
+                                },
+                                contentDescription = null
+                            )
+                        },
                         label = { Text(item.label) },
                         alwaysShowLabel = true
                     )
@@ -112,7 +132,7 @@ private fun TodayDestination(repository: ReflectionRepository, resurfacingEnable
             } else {
                 SparkMomentCard(
                     moment,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = "Write ${moment.title}") {
                         onEdit(if (moment.title == "Gratitude") "GRATITUDE" else "WIN")
                     }
                 )
