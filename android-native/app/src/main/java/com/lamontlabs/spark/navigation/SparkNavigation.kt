@@ -1,6 +1,6 @@
 package com.lamontlabs.spark.navigation
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable\nimport androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.lamontlabs.spark.design.SparkMoment
+import com.lamontlabs.spark.data.ReflectionRepository\nimport com.lamontlabs.spark.editor.ReflectionEditor\nimport com.lamontlabs.spark.design.SparkMoment
 import com.lamontlabs.spark.design.SparkMomentCard
 
 private enum class Destination(val label: String) {
@@ -27,7 +27,7 @@ private enum class Destination(val label: String) {
 }
 
 @Composable
-fun SparkNavigation() {
+fun SparkNavigation(repository: ReflectionRepository) {\n    var editingKind by rememberSaveable { mutableStateOf<String?>(null) }
     var selected by rememberSaveable { mutableStateOf(Destination.TODAY.name) }
     val destination = Destination.entries.firstOrNull { it.name == selected } ?: Destination.TODAY
     Scaffold(
@@ -47,7 +47,7 @@ fun SparkNavigation() {
         }
     ) { padding ->
         when (destination) {
-            Destination.TODAY -> TodayDestination(Modifier.padding(padding))
+            Destination.TODAY -> TodayDestination(Modifier.padding(padding), onEdit = { editingKind = it })
             Destination.JOURNAL -> EmptyDestination(
                 "Your journal", "Saved gratitude and wins will appear here.", Modifier.padding(padding)
             )
@@ -62,7 +62,7 @@ fun SparkNavigation() {
 }
 
 @Composable
-private fun TodayDestination(modifier: Modifier) {
+private fun TodayDestination(modifier: Modifier, onEdit: (String) -> Unit) {
     val moments = listOf(
         SparkMoment("Gratitude", "What brought a little light into your day?"),
         SparkMoment("Daily Win", "What deserves a little credit today?"),
@@ -80,8 +80,8 @@ private fun TodayDestination(modifier: Modifier) {
                 Text("There's something worth noticing.", style = MaterialTheme.typography.bodyLarge)
             }
         }
-        items(moments, key = { it.title }) { SparkMomentCard(it) }
-        item { Text("Preview only — saving is not yet available.", style = MaterialTheme.typography.bodySmall) }
+        items(moments, key = { it.title }) { moment ->\n            if (moment.title == "Affirmation") {\n                SparkMomentCard(moment)\n            } else {\n                SparkMomentCard(\n                    moment,\n                    modifier = Modifier.clickable {\n                        onEdit(if (moment.title == "Gratitude") "GRATITUDE" else "WIN")\n                    }\n                )\n            }\n        }
+        item { Text("Tap Gratitude or Daily Win to write a private reflection.", style = MaterialTheme.typography.bodySmall) }
     }
 }
 
