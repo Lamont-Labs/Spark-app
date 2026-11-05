@@ -61,7 +61,7 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
         }
         val checksums = JSONObject()
         for ((id, file) in photoFiles) checksums.put(id, sha256(file))
-        val root = JSONObject().put("format", "spark-photo-archive").put("version", 1)
+        val root = JSONObject().put("format", "spark-photo-archive").put("version", 2)
             .put("reflections", manifest).put("photo_sha256", checksums)
         val bytes = root.toString().toByteArray(Charsets.UTF_8)
         require(bytes.size <= 5_000_000) { "Manifest exceeds 5 MB" }
@@ -124,10 +124,10 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
                 }
             }
             val root = JSONObject((manifestBytes ?: error("Missing manifest")).toString(Charsets.UTF_8))
-            require(root.getString("format") == "spark-photo-archive" && root.getInt("version") == 1) {
-                "Unsupported photo archive"
-            }
-            val checksums = root.getJSONObject("photo_sha256")
+            require(root.getString("format") == "spark-photo-archive") { "Unsupported photo archive format" }
+            val version = root.getInt("version")
+            require(version == 1 || version == 2) { "Unsupported photo archive version" }
+            val checksums = if (version == 2) root.getJSONObject("photo_sha256") else null
             val array = root.getJSONArray("reflections")
             require(array.length() <= 10_000) { "Too many reflections" }
             val ids = HashSet<String>()
@@ -154,14 +154,17 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
             }
             require(staged.keys == referenced) { "Photo entries do not match manifest" }
             require(staged.values.all { it.length() in 1..maxPhoto }) { "Invalid photo size" }
-            val checksumKeys = HashSet<String>()
-            val iterator = checksums.keys()
-            while (iterator.hasNext()) checksumKeys.add(iterator.next())
-            require(checksumKeys == referenced) { "Photo checksum list does not match manifest" }
-            for (id in referenced) {
-                val expected = checksums.getString(id)
-                require(Regex("[0-9a-f]{64}").matches(expected)) { "Invalid photo checksum" }
-                require(sha256(staged[id] ?: error("Missing photo")) == expected) { "Corrupted photo bytes" }
+            if (version == 2) {
+                val hashes = checksums ?: error("Missing photo checksums")
+                val checksumKeys = HashSet<String>()
+                val iterator = hashes.keys()
+                while (iterator.hasNext()) checksumKeys.add(iterator.next())
+                require(checksumKeys == referenced) { "Photo checksum list does not match manifest" }
+                for (id in referenced) {
+                    val expected = hashes.getString(id)
+                    require(Regex("[0-9a-f]{64}").matches(expected)) { "Invalid photo checksum" }
+                    require(sha256(staged[id] ?: error("Missing photo")) == expected) { "Corrupted photo bytes" }
+                }
             }
             val newRows = rows.filter { dao.findById(it.id) == null }
             val requiredPhotos = newRows.mapNotNull { it.photoId }.toSet()
