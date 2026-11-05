@@ -47,8 +47,7 @@ jobs:
           fi
           "$SIGNER" verify --verbose "$APK"
           "$AAPT" dump xmltree "$APK" AndroidManifest.xml > /tmp/spark-manifest.txt
-          grep -F "allowBackup" /tmp/spark-manifest.txt
-          grep -F "0x0" /tmp/spark-manifest.txt > /dev/null
+          grep -E "allowBackup.*0x0$" /tmp/spark-manifest.txt
       - name: Write APK checksum
         shell: bash
         run: |
