@@ -26,6 +26,12 @@ import com.lamontlabs.spark.journal.JournalScreen
 import com.lamontlabs.spark.affirm.AffirmScreen
 import com.lamontlabs.spark.progress.ProgressScreen
 import com.lamontlabs.spark.resurface.ResurfacingCard
+import com.lamontlabs.spark.privacy.PrivacyPreferences
+import com.lamontlabs.spark.privacy.PrivacyScreen
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.lamontlabs.spark.design.SparkMoment
 import com.lamontlabs.spark.design.SparkMomentCard
 
@@ -35,9 +41,20 @@ private enum class Destination(val label: String) {
 
 @Composable
 fun SparkNavigation(repository: ReflectionRepository) {
+    val context = LocalContext.current
+    val preferences = remember(context) { PrivacyPreferences(context) }
+    val resurfacingEnabled by preferences.resurfacingEnabled.collectAsState(initial = false)
+    var privacyOpen by rememberSaveable { mutableStateOf(false) }
     var editingKind by rememberSaveable { mutableStateOf<String?>(null) }
     var selected by rememberSaveable { mutableStateOf(Destination.TODAY.name) }
     val destination = Destination.entries.firstOrNull { it.name == selected } ?: Destination.TODAY
+    if (privacyOpen) {
+        Column {
+            TextButton(onClick = { privacyOpen = false }) { Text("Back to Spark") }
+            PrivacyScreen(preferences)
+        }
+        return
+    }
     if (editingKind != null) {
         ReflectionEditor(kind = editingKind!!, repository = repository, onSaved = { editingKind = null }, onCancel = { editingKind = null })
         return
@@ -59,16 +76,19 @@ fun SparkNavigation(repository: ReflectionRepository) {
         }
     ) { padding ->
         when (destination) {
-            Destination.TODAY -> TodayDestination(repository, Modifier.padding(padding), onEdit = { editingKind = it })
+            Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, Modifier.padding(padding), onEdit = { editingKind = it })
             Destination.JOURNAL -> JournalScreen(repository, Modifier.padding(padding))
             Destination.AFFIRM -> AffirmScreen(Modifier.padding(padding))
-            Destination.YOU -> ProgressScreen(repository, Modifier.padding(padding))
+            Destination.YOU -> Column(modifier = Modifier.padding(padding)) {
+                TextButton(onClick = { privacyOpen = true }) { Text("Privacy & preferences") }
+                ProgressScreen(repository)
+            }
         }
     }
 }
 
 @Composable
-private fun TodayDestination(repository: ReflectionRepository, modifier: Modifier, onEdit: (String) -> Unit) {
+private fun TodayDestination(repository: ReflectionRepository, resurfacingEnabled: Boolean, modifier: Modifier, onEdit: (String) -> Unit) {
     val moments = listOf(
         SparkMoment("Gratitude", "What brought a little light into your day?"),
         SparkMoment("Daily Win", "What deserves a little credit today?"),
@@ -98,7 +118,9 @@ private fun TodayDestination(repository: ReflectionRepository, modifier: Modifie
                 )
             }
         }
-        item { ResurfacingCard(repository) }
+        if (resurfacingEnabled) {
+            item { ResurfacingCard(repository) }
+        }
         item { Text("Tap Gratitude or Daily Win to write a private reflection.", style = MaterialTheme.typography.bodySmall) }
     }
 }
