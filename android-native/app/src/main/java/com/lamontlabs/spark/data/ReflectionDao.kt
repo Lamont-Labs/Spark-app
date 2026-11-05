@@ -11,6 +11,12 @@ interface ReflectionDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(reflection: ReflectionEntity)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfAbsent(reflections: List<ReflectionEntity>): List<Long>
+
+    @Query("SELECT * FROM reflections ORDER BY reflection_date DESC, created_at_utc DESC, id DESC")
+    suspend fun snapshotAll(): List<ReflectionEntity>
+
     @Query("SELECT * FROM reflections WHERE id = :id LIMIT 1")
     suspend fun findById(id: String): ReflectionEntity?
 
