@@ -117,6 +117,7 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
                             out.write(buffer, 0, count)
                         }
                     }
+                    require(destination.length() > 0L) { "Empty archive entry" }
                     if (name == "manifest.json") manifestBytes = destination.readBytes()
                     else staged[name.substringAfter('/').removeSuffix(".jpg")] = destination
                     zip.closeEntry()
@@ -152,6 +153,7 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
                 )
             }
             require(staged.keys == referenced) { "Photo entries do not match manifest" }
+            require(staged.values.all { it.length() in 1..maxPhoto }) { "Invalid photo size" }
             val checksumKeys = HashSet<String>()
             val iterator = checksums.keys()
             while (iterator.hasNext()) checksumKeys.add(iterator.next())
