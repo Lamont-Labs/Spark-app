@@ -42,3 +42,24 @@ Legacy Expo source is preserved unchanged.
 
 ## Next development task
 SPK-003: verify reproducible GitHub Actions build and APK delivery, then implement foundational navigation and persistence in subsequent tasks.
+
+
+## SPK-003 verified build result (2026-11-05)
+
+GitHub Actions run: https://github.com/Lamont-Labs/Spark-app/actions/runs/42098934261
+Source commit built: bee2109ed76a8ace8cb6f258f9f11926d03bd09d
+Result: SUCCESS
+- Java/Gradle setup: passed
+- Android SDK installation: passed
+- :app:assembleDebug: passed
+- SHA-256 computation step: passed (APK byte digest not transcribed from logs)
+- actions/upload-artifact: passed
+Artifact ID: 13448942000
+Artifact name: spark3-debug-apk
+Artifact archive size: 8,855,262 bytes
+Artifact ZIP SHA-256 as reported by GitHub: 7a0fd226a7a9193633a2a9f90feaa0f767e0ca5cae85e9e375f59be55a14e427
+Artifact URL: https://github.com/Lamont-Labs/Spark-app/actions/runs/42098934261/artifacts/13448942000
+
+Important: the artifact digest is for the uploaded archive, not necessarily the APK inside. A device install, screenshot, accessibility audit, and upgrade compatibility remain unverified. This document update is later than the successful source commit; the successful build applies to the stated source commit only.
+
+Next: SPK-004, implement a design-system foundation with explicit tokens and light/dark behavior in a new task branch. Retain all legacy data and do not claim feature completeness.
