@@ -12,6 +12,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.layout.ContentScale
+import com.lamontlabs.spark.media.PrivatePhotoStore
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -21,6 +28,7 @@ import com.lamontlabs.spark.data.ReflectionRepository
 
 @Composable
 fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifier) {
+    val photoStore = remember(LocalContext.current) { PrivatePhotoStore(LocalContext.current) }
     val stream = remember(repository) { repository.observeAll() }
     val reflections by stream.collectAsState(initial = emptyList())
     LazyColumn(
@@ -50,7 +58,25 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
                         if (reflection.kind == "GRATITUDE") "Gratitude" else "Daily Win",
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text(reflection.body, style = MaterialTheme.typography.bodyLarge)
+                    if (reflection.body.isNotBlank()) {
+                        Text(reflection.body, style = MaterialTheme.typography.bodyLarge)
+                    }
+                    reflection.photoId?.let { id ->
+                        val photo = photoStore.fileFor(id)
+                        val bitmap = remember(id) {
+                            photo?.let { file ->
+                                BitmapFactory.Options().run {
+                                    inSampleSize = 4
+                                    BitmapFactory.decodeFile(file.absolutePath, this)
+                                }
+                            }
+                        }
+                        if (bitmap != null) {
+                            Image(bitmap.asImageBitmap(), contentDescription = "Attached reflection photo", modifier = Modifier.fillMaxWidth().height(180.dp), contentScale = ContentScale.Crop)
+                        } else {
+                            Text("Attached photo unavailable", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
                     reflection.mood?.let { selectedMood ->
                         Text("Felt: $selectedMood", style = MaterialTheme.typography.labelMedium)
                     }
