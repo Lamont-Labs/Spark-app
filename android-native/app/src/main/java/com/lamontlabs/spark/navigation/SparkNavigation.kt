@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.lamontlabs.spark.data.ReflectionRepository
 import com.lamontlabs.spark.editor.ReflectionEditor
+import com.lamontlabs.spark.journal.JournalScreen
 import com.lamontlabs.spark.design.SparkMoment
 import com.lamontlabs.spark.design.SparkMomentCard
 
@@ -56,9 +57,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
     ) { padding ->
         when (destination) {
             Destination.TODAY -> TodayDestination(Modifier.padding(padding), onEdit = { editingKind = it })
-            Destination.JOURNAL -> EmptyDestination(
-                "Your journal", "Saved gratitude and wins will appear here.", Modifier.padding(padding)
-            )
+            Destination.JOURNAL -> JournalScreen(repository, Modifier.padding(padding))
             Destination.AFFIRM -> EmptyDestination(
                 "Your affirmations", "A place for words worth carrying with you.", Modifier.padding(padding)
             )
