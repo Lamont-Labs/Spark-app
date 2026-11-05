@@ -9,7 +9,6 @@ import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.File
-import java.security.MessageDigest
 import java.time.LocalDate
 import java.util.UUID
 import java.util.zip.ZipEntry
@@ -25,18 +24,7 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
     private val maxPhoto = 15L * 1024 * 1024
     private val maxArchive = 200L * 1024 * 1024
 
-    private fun sha256(file: File): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        file.inputStream().use { input ->
-            val buffer = ByteArray(8192)
-            while (true) {
-                val count = input.read(buffer)
-                if (count < 0) break
-                digest.update(buffer, 0, count)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
-    }
+    private fun sha256(file: File): String = file.inputStream().use { ArchiveIntegrity.sha256(it) }
 
     suspend fun exportTo(output: OutputStream) {
         val rows = dao.snapshotAll()
@@ -126,8 +114,7 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
             val root = JSONObject((manifestBytes ?: error("Missing manifest")).toString(Charsets.UTF_8))
             require(root.getString("format") == "spark-photo-archive") { "Unsupported photo archive format" }
             val version = root.getInt("version")
-            require(version == 1 || version == 2) { "Unsupported photo archive version" }
-            require(version != 1 || !root.has("photo_sha256")) { "Unexpected checksums in legacy archive" }
+            ArchiveIntegrity.validateVersion(version, root.has("photo_sha256"))
             val checksums = if (version == 2) root.getJSONObject("photo_sha256") else null
             val array = root.getJSONArray("reflections")
             require(array.length() <= 10_000) { "Too many reflections" }
@@ -153,14 +140,15 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
                     schemaVersion = item.getInt("schema_version")
                 )
             }
-            require(staged.keys == referenced) { "Photo entries do not match manifest" }
+            ArchiveIntegrity.validatePhotoReferences(referenced, staged.keys, null)
             require(staged.values.all { it.length() in 1..maxPhoto }) { "Invalid photo size" }
             if (version == 2) {
                 val hashes = checksums ?: error("Missing photo checksums")
                 val checksumKeys = HashSet<String>()
                 val iterator = hashes.keys()
                 while (iterator.hasNext()) checksumKeys.add(iterator.next())
-                require(checksumKeys == referenced) { "Photo checksum list does not match manifest" }
+                val checksumMap = checksumKeys.associateWith { hashes.getString(it) }
+                ArchiveIntegrity.validatePhotoReferences(referenced, staged.keys, checksumMap)
                 for (id in referenced) {
                     val expected = hashes.getString(id)
                     require(Regex("[0-9a-f]{64}").matches(expected)) { "Invalid photo checksum" }
