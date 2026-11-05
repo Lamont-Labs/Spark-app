@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.lamontlabs.spark.data.ReflectionRepository
+import com.lamontlabs.spark.prompts.PromptLibrary
 import java.time.LocalDate
 import kotlinx.coroutines.launch
 
@@ -32,6 +33,7 @@ fun ReflectionEditor(
     var saving by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val prompt = PromptLibrary.daily(kind, LocalDate.now())
     val label = if (kind == "GRATITUDE") "Gratitude" else "Daily Win"
     Column(
         modifier = Modifier.padding(24.dp),
@@ -43,6 +45,10 @@ fun ReflectionEditor(
             else "What did you accomplish, big or small?",
             style = MaterialTheme.typography.bodyLarge
         )
+        if (prompt != null) {
+            Text("A gentle starting point", style = MaterialTheme.typography.labelLarge)
+            Text(prompt.text, style = MaterialTheme.typography.bodyLarge)
+        }
         OutlinedTextField(
             value = body,
             onValueChange = { body = it; error = null },
@@ -62,7 +68,7 @@ fun ReflectionEditor(
                     saving = true
                     scope.launch {
                         try {
-                            repository.create(kind, body, LocalDate.now())
+                            repository.create(kind, body, LocalDate.now(), promptId = prompt?.id)
                             onSaved()
                         } catch (exception: Exception) {
                             error = "Could not save. Your text is still here; please retry."
