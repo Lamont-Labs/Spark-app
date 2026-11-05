@@ -15,6 +15,7 @@ class ReflectionBackup(private val dao: ReflectionDao) {
     suspend fun exportJson(): String {
         val rows = dao.snapshotAll()
         require(rows.none { it.body.isBlank() }) { "Photo-only reflections cannot be exported without photo backup support" }
+        require(rows.size <= 10_000) { "Too many reflections for this backup format" }
         val items = JSONArray()
         for (r in rows) {
             items.put(JSONObject().apply {
@@ -31,8 +32,10 @@ class ReflectionBackup(private val dao: ReflectionDao) {
                 put("schema_version", r.schemaVersion)
             })
         }
-        return JSONObject().put("format", "spark-reflections").put("version", 1)
+        val json = JSONObject().put("format", "spark-reflections").put("version", 1)
             .put("photo_bytes_included", false).put("reflections", items).toString(2)
+        require(json.toByteArray(Charsets.UTF_8).size <= 5_000_000) { "Backup exceeds 5 MB" }
+        return json
     }
 
     suspend fun importJson(text: String): ImportResult {
@@ -41,7 +44,7 @@ class ReflectionBackup(private val dao: ReflectionDao) {
         require(root.getString("format") == "spark-reflections" && root.getInt("version") == 1) {
             "Unsupported backup format"
         }
-        require(!root.optBoolean("photo_bytes_included", false)) { "Unsupported photo archive" }
+        require(root.has("photo_bytes_included") && !root.getBoolean("photo_bytes_included")) { "Unsupported photo archive" }
         val array = root.getJSONArray("reflections")
         require(array.length() <= 10_000) { "Too many reflections" }
         val seen = HashSet<String>()
@@ -53,6 +56,7 @@ class ReflectionBackup(private val dao: ReflectionDao) {
             val date = item.getString("reflection_date")
             require(LocalDate.parse(date).toString() == date) { "Invalid reflection date" }
             // Never create broken photo references: a text-only import drops photo metadata.
+            require(item.has("photo_id") && (item.isNull("photo_id") || item.getString("photo_id").isNotBlank())) { "Invalid photo metadata" }
             val body = item.getString("body")
             require(body.isNotBlank()) { "Photo-only entries cannot be restored without photo bytes" }
             ReflectionEntity(
