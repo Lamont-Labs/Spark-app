@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Switch
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -30,7 +32,7 @@ private val pages = listOf(
 )
 
 @Composable
-fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrite: (String) -> Unit, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
+fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrite: (String) -> Unit, remindersEnabled: Boolean, reminderHour: Int, onReminderToggle: (Boolean) -> Unit, onReminderHour: (Int) -> Unit, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
     val page = pages[step.coerceIn(0, pages.lastIndex)]
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 36.dp),
@@ -50,6 +52,22 @@ fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrit
                     fontWeight = FontWeight.SemiBold, lineHeight = 42.sp)
                 Text(page.description, style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        if (step == 3) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Gentle daily reminder", style = MaterialTheme.typography.titleMedium)
+                Switch(checked = remindersEnabled, onCheckedChange = onReminderToggle)
+            }
+            Text(if (remindersEnabled) "A quiet nudge, never your private journal text." else "Off by default. You can always decide later.",
+                style = MaterialTheme.typography.bodyMedium)
+            if (remindersEnabled) {
+                listOf(9 to "Morning", 14 to "Afternoon", 19 to "Evening").forEach { (hour, label) ->
+                    FilterChip(selected = reminderHour == hour, onClick = { onReminderHour(hour) },
+                        label = { Text(label) }, modifier = Modifier.fillMaxWidth())
+                }
+                Text("Delivery time is approximate.", style = MaterialTheme.typography.bodySmall)
             }
         }
         if (step == 2) {
