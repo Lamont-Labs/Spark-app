@@ -30,7 +30,7 @@ private val pages = listOf(
 )
 
 @Composable
-fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
+fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrite: (String) -> Unit, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
     val page = pages[step.coerceIn(0, pages.lastIndex)]
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 36.dp),
@@ -50,6 +50,16 @@ fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onNext
                     fontWeight = FontWeight.SemiBold, lineHeight = 42.sp)
                 Text(page.description, style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        if (step == 2) {
+            Text("CHOOSE YOUR FIRST MOMENT", style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedButton(onClick = { onWrite("GRATITUDE") }, modifier = Modifier.fillMaxWidth()) {
+                Text("Write a gratitude")
+            }
+            OutlinedButton(onClick = { onWrite("WIN") }, modifier = Modifier.fillMaxWidth()) {
+                Text("Celebrate a daily win")
             }
         }
         if (step == 1) {
