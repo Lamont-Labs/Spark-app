@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -13,6 +14,12 @@ private val Context.onboardingStore by preferencesDataStore(name = "spark-onboar
 class OnboardingPreferences(private val context: Context) {
     private val completedKey = booleanPreferencesKey("completed")
     private val stepKey = intPreferencesKey("step")
+    private val focusKey = stringPreferencesKey("focus")
+    val focus: Flow<String> = context.onboardingStore.data.map { it[focusKey] ?: "EVERYTHING" }
+    suspend fun setFocus(value: String) {
+        require(value in setOf("GRATITUDE", "WINS", "CONFIDENCE", "EVERYTHING"))
+        context.onboardingStore.edit { it[focusKey] = value }
+    }
     val completed: Flow<Boolean> = context.onboardingStore.data.map { it[completedKey] ?: false }
     val step: Flow<Int> = context.onboardingStore.data.map { (it[stepKey] ?: 0).coerceIn(0, 4) }
 
