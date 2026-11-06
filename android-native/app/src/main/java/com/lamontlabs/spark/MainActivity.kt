@@ -30,12 +30,15 @@ class MainActivity : ComponentActivity() {
                     val onboarding = remember(context) { OnboardingPreferences(context) }
                     val completed by onboarding.completed.collectAsState(initial = null)
                     val step by onboarding.step.collectAsState(initial = 0)
+                    val focus by onboarding.focus.collectAsState(initial = "EVERYTHING")
                     val scope = rememberCoroutineScope()
                     when (completed) {
                         null -> Unit
                         true -> SparkNavigation(repository)
                         false -> FirstLightScreen(
                             step = step,
+                            focus = focus,
+                            onFocus = { selected -> scope.launch { onboarding.setFocus(selected) } },
                             onNext = { scope.launch { if (step >= 4) onboarding.finish() else onboarding.setStep(step + 1) } },
                             onBack = { scope.launch { onboarding.setStep(step - 1) } },
                             onSkip = { scope.launch { onboarding.finish() } }
