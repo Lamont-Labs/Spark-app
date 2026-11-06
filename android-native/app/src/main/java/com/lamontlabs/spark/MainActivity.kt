@@ -1,6 +1,14 @@
 package com.lamontlabs.spark
 
 import android.os.Bundle
+import android.os.Build
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import com.lamontlabs.spark.privacy.PrivacyPreferences
+import com.lamontlabs.spark.reminders.ReminderScheduler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +44,23 @@ class MainActivity : ComponentActivity() {
                     val step by onboarding.step.collectAsState(initial = 0)
                     val focus by onboarding.focus.collectAsState(initial = "EVERYTHING")
                     val scope = rememberCoroutineScope()
+                    val reminderPreferences = remember(context) { PrivacyPreferences(context) }
+                    val remindersEnabled by reminderPreferences.remindersEnabled.collectAsState(initial = false)
+                    val reminderHour by reminderPreferences.reminderHour.collectAsState(initial = 19)
+                    var reminderMessage by rememberSaveable { mutableStateOf<String?>(null) }
+                    val permissionLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.RequestPermission()
+                    ) { granted ->
+                        if (granted) {
+                            scope.launch {
+                                reminderPreferences.setRemindersEnabled(true)
+                                ReminderScheduler.configure(context, true, reminderHour)
+                                reminderMessage = null
+                            }
+                        } else {
+                            reminderMessage = "Notifications are off. You can enable them later in preferences."
+                        }
+                    }
                     var onboardingEditor by rememberSaveable { mutableStateOf<String?>(null) }
                     when (completed) {
                         null -> Unit
@@ -52,6 +77,27 @@ class MainActivity : ComponentActivity() {
                             focus = focus,
                             onFocus = { selected -> scope.launch { onboarding.setFocus(selected) } },
                             onWrite = { kind -> onboardingEditor = kind },
+                            remindersEnabled = remindersEnabled,
+                            reminderHour = reminderHour,
+                            onReminderToggle = { enabled ->
+                                if (enabled && Build.VERSION.SDK_INT >= 33 &&
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    scope.launch {
+                                        reminderPreferences.setRemindersEnabled(enabled)
+                                        ReminderScheduler.configure(context, enabled, reminderHour)
+                                        reminderMessage = null
+                                    }
+                                }
+                            },
+                            onReminderHour = { hour ->
+                                scope.launch {
+                                    reminderPreferences.setReminderHour(hour)
+                                    if (remindersEnabled) ReminderScheduler.configure(context, true, hour)
+                                }
+                            },
+                            reminderMessage = reminderMessage,
                             onNext = { scope.launch { if (step >= 4) onboarding.finish() else onboarding.setStep(step + 1) } },
                             onBack = { scope.launch { onboarding.setStep(step - 1) } },
                             onSkip = { scope.launch { onboarding.finish() } }
