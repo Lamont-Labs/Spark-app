@@ -6,10 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Spacer
@@ -44,7 +45,7 @@ private val pages = listOf(
 fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrite: (String) -> Unit, remindersEnabled: Boolean, reminderHour: Int, onReminderToggle: (Boolean) -> Unit, onReminderHour: (Int) -> Unit, reminderMessage: String?, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
     val page = pages[step.coerceIn(0, pages.lastIndex)]
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 36.dp),
+        modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 28.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         Text("SPARK  /  FIRST LIGHT", style = MaterialTheme.typography.labelMedium,
@@ -59,7 +60,7 @@ fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrit
                     color = MaterialTheme.colorScheme.primary)
             }
         } else {
-            Spacer(Modifier.weight(0.35f))
+            Spacer(Modifier.height(36.dp))
         }
         Surface(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.primaryContainer) {
             Column(modifier = Modifier.fillMaxWidth().padding(28.dp),
@@ -125,7 +126,7 @@ fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrit
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary)
         }
-        Spacer(Modifier.weight(0.65f))
+        Spacer(Modifier.height(24.dp))
         Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {
             Text(if (step == pages.lastIndex) "Open my Spark" else "Continue")
         }
