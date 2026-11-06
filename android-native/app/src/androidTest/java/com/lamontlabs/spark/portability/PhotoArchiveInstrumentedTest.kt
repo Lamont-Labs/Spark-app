@@ -207,6 +207,67 @@ class PhotoArchiveInstrumentedTest {
         assertNull(db.reflectionDao().findById(original.id))
     }
 
+    @Test fun truncatedArchiveDoesNotModifyExistingReflection() = runBlocking {
+        val existing = row()
+        db.reflectionDao().insert(existing)
+        val bytes = archiveBytes()
+        val truncated = bytes.copyOf(bytes.size / 2)
+        try {
+            archive.importFrom(ByteArrayInputStream(truncated))
+            fail("Expected incomplete ZIP rejection")
+        } catch (_: Exception) { }
+        assertEquals(existing, db.reflectionDao().findById(existing.id))
+    }
+
+    @Test fun invalidManifestDateRejectsImportWithoutWrites() = runBlocking {
+        val original = row()
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        val invalid = rewriteManifest(bytes) { root ->
+            root.getJSONArray("reflections").getJSONObject(0)
+                .put("reflection_date", "2026-02-30")
+        }
+        try {
+            archive.importFrom(ByteArrayInputStream(invalid))
+            fail("Expected invalid date rejection")
+        } catch (_: Exception) { }
+        assertNull(db.reflectionDao().findById(original.id))
+    }
+
+    @Test fun missingReferencedPhotoRejectsWithoutDatabaseWrites() = runBlocking {
+        val id = UUID.randomUUID().toString()
+        photos.add(id)
+        val file = File(context.filesDir, "reflection-photos/$id.jpg")
+        file.parentFile!!.mkdirs()
+        file.writeBytes(byteArrayOf(1, 2, 3))
+        val original = row(photoId = id)
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        file.delete()
+        val output = ByteArrayOutputStream()
+        ZipOutputStream(output).use { zip ->
+            ZipInputStream(ByteArrayInputStream(bytes)).use { source ->
+                while (true) {
+                    val entry = source.nextEntry ?: break
+                    if (entry.name == "manifest.json") {
+                        zip.putNextEntry(ZipEntry(entry.name))
+                        zip.write(source.readBytes())
+                        zip.closeEntry()
+                    }
+                    source.closeEntry()
+                }
+            }
+        }
+        try {
+            archive.importFrom(ByteArrayInputStream(output.toByteArray()))
+            fail("Expected missing photo rejection")
+        } catch (_: IllegalArgumentException) { }
+        assertNull(db.reflectionDao().findById(original.id))
+        assertFalse(file.exists())
+    }
+
     @Test fun unsupportedVersionRejectsBeforeDatabaseWrites() = runBlocking {
         val original = row()
         db.reflectionDao().insert(original)
