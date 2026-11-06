@@ -57,6 +57,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import com.lamontlabs.spark.onboarding.OnboardingPreferences
 import com.lamontlabs.spark.design.SparkMoment
 import com.lamontlabs.spark.design.SparkMomentCard
 
@@ -69,6 +70,8 @@ fun SparkNavigation(repository: ReflectionRepository) {
     val context = LocalContext.current
     val preferences = remember(context) { PrivacyPreferences(context) }
     val resurfacingEnabled by preferences.resurfacingEnabled.collectAsState(initial = false)
+    val onboarding = remember(context) { OnboardingPreferences(context) }
+    val focus by onboarding.focus.collectAsState(initial = "EVERYTHING")
     var privacyOpen by rememberSaveable { mutableStateOf(false) }
     var editingKind by rememberSaveable { mutableStateOf<String?>(null) }
     var selected by rememberSaveable { mutableStateOf(Destination.TODAY.name) }
@@ -120,7 +123,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
             label = "Spark destination transition"
         ) { active ->
             when (active) {
-                Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, Modifier, onEdit = { editingKind = it })
+                Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, focus, Modifier, onEdit = { editingKind = it })
                 Destination.JOURNAL -> JournalScreen(repository, Modifier)
                 Destination.AFFIRM -> AffirmScreen(Modifier)
                 Destination.YOU -> Column {
@@ -133,9 +136,15 @@ fun SparkNavigation(repository: ReflectionRepository) {
 }
 
 @Composable
-private fun TodayDestination(repository: ReflectionRepository, resurfacingEnabled: Boolean, modifier: Modifier, onEdit: (String) -> Unit) {
+private fun TodayDestination(repository: ReflectionRepository, resurfacingEnabled: Boolean, focus: String, modifier: Modifier, onEdit: (String) -> Unit) {
     val today = java.time.LocalDate.now()
     val dateLabel = today.format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d"))
+    val focusLine = when (focus) {
+        "GRATITUDE" -> "There is good worth noticing."
+        "WINS" -> "Your progress deserves recognition."
+        "CONFIDENCE" -> "Give yourself room to grow."
+        else -> "Take a moment. The rest can wait."
+    }
     val moments = listOf(
         SparkMoment("Gratitude", "What brought a little light into your day?"),
         SparkMoment("Daily Win", "What deserves a little credit today?"),
@@ -157,7 +166,7 @@ private fun TodayDestination(repository: ReflectionRepository, resurfacingEnable
                 Text(dateLabel, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("A little good,\\na little every day.".replace("\\n", "\n"), style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.SemiBold, lineHeight = 42.sp)
-                Text("Take a moment. The rest can wait.", style = MaterialTheme.typography.bodyLarge,
+                Text(focusLine, style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
