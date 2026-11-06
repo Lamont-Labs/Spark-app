@@ -28,7 +28,17 @@ jobs:
           gradle-version: '8.13'
       - name: Run local unit tests
         working-directory: android-native
-        run: gradle --no-daemon :app:testDebugUnitTest
+        run: |
+          set -o pipefail
+          gradle --no-daemon :app:testDebugUnitTest --console=plain 2>&1 | tee "$GITHUB_WORKSPACE/spark-build-diagnostics.log"
+      - name: Upload build diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spark3-build-diagnostics
+          path: spark-build-diagnostics.log
+          retention-days: 7
+          if-no-files-found: warn
       - name: Compile Android integration tests
         working-directory: android-native
         run: gradle --no-daemon :app:assembleDebugAndroidTest
