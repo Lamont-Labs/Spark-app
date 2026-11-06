@@ -137,6 +137,76 @@ class PhotoArchiveInstrumentedTest {
         assertFalse(file.exists())
     }
 
+    @Test fun legacyVersionOneArchiveRestoresText() = runBlocking {
+        val original = row()
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        val legacy = rewriteManifest(bytes) { root ->
+            root.put("version", 1)
+            root.remove("photo_sha256")
+        }
+        val result = archive.importFrom(ByteArrayInputStream(legacy))
+        assertEquals(1, result.imported)
+        assertEquals(original, db.reflectionDao().findById(original.id))
+    }
+
+    @Test fun legacyVersionOneWithChecksumsIsRejected() = runBlocking {
+        val original = row()
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        val malformed = rewriteManifest(bytes) { it.put("version", 1) }
+        try {
+            archive.importFrom(ByteArrayInputStream(malformed))
+            fail("Expected rejection")
+        } catch (_: IllegalArgumentException) { }
+        assertNull(db.reflectionDao().findById(original.id))
+    }
+
+    @Test fun duplicateManifestReflectionIdRejectsWholeImport() = runBlocking {
+        val original = row()
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        val duplicate = rewriteManifest(bytes) { root ->
+            val items = root.getJSONArray("reflections")
+            items.put(JSONObject(items.getJSONObject(0).toString()))
+        }
+        try {
+            archive.importFrom(ByteArrayInputStream(duplicate))
+            fail("Expected duplicate ID rejection")
+        } catch (_: IllegalArgumentException) { }
+        assertNull(db.reflectionDao().findById(original.id))
+    }
+
+    @Test fun archiveWithUnexpectedPhotoPathIsRejected() = runBlocking {
+        val original = row()
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        val output = ByteArrayOutputStream()
+        ZipOutputStream(output).use { zip ->
+            ZipInputStream(ByteArrayInputStream(bytes)).use { source ->
+                while (true) {
+                    val entry = source.nextEntry ?: break
+                    zip.putNextEntry(ZipEntry(entry.name))
+                    zip.write(source.readBytes())
+                    zip.closeEntry()
+                    source.closeEntry()
+                }
+            }
+            zip.putNextEntry(ZipEntry("../escape.txt"))
+            zip.write(byteArrayOf(1))
+            zip.closeEntry()
+        }
+        try {
+            archive.importFrom(ByteArrayInputStream(output.toByteArray()))
+            fail("Expected path rejection")
+        } catch (_: IllegalArgumentException) { }
+        assertNull(db.reflectionDao().findById(original.id))
+    }
+
     @Test fun unsupportedVersionRejectsBeforeDatabaseWrites() = runBlocking {
         val original = row()
         db.reflectionDao().insert(original)
