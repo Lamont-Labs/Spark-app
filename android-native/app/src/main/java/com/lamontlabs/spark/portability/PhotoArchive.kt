@@ -12,6 +12,7 @@ import java.io.File
 import java.time.LocalDate
 import java.util.UUID
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
@@ -73,12 +74,46 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
         val staging = File(context.cacheDir, "spark-restore-${UUID.randomUUID()}")
         require(staging.mkdirs()) { "Unable to create temporary restore directory" }
         val staged = LinkedHashMap<String, File>()
+        val archiveFile = File(staging, "incoming.zip")
         val installed = ArrayList<String>()
         try {
+            // Require a complete ZIP central directory before processing any records.
+            input.use { source ->
+                archiveFile.outputStream().use { output ->
+                    val buffer = ByteArray(8192)
+                    var received = 0L
+                    while (true) {
+                        val count = source.read(buffer)
+                        if (count < 0) break
+                        received += count
+                        require(received <= maxArchive + 5_000_000L) { "ZIP exceeds size limit" }
+                        output.write(buffer, 0, count)
+                    }
+                }
+            }
+            ZipFile(archiveFile).use { verified ->
+                require(verified.size() in 1..10_001) { "Invalid ZIP entry count" }
+                val entries = verified.entries()
+                while (entries.hasMoreElements()) {
+                    val entry = entries.nextElement()
+                    require(!entry.isDirectory) { "Unexpected archive directory" }
+                    verified.getInputStream(entry).use { stream ->
+                        val buffer = ByteArray(8192)
+                        var entryBytes = 0L
+                        val limit = if (entry.name == "manifest.json") 5_000_000L else maxPhoto
+                        while (true) {
+                            val count = stream.read(buffer)
+                            if (count < 0) break
+                            entryBytes += count
+                            require(entryBytes <= limit) { "ZIP entry exceeds limit" }
+                        }
+                    }
+                }
+            }
             var manifestBytes: ByteArray? = null
             var total = 0L
             var entries = 0
-            ZipInputStream(input).use { zip ->
+            ZipInputStream(archiveFile.inputStream()).use { zip ->
                 while (true) {
                     val entry = zip.nextEntry ?: break
                     require(++entries <= 10_001) { "Too many archive entries" }
