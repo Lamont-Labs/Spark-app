@@ -200,6 +200,12 @@ class PhotoArchive(private val context: Context, private val dao: ReflectionDao)
                 val target = photos.newPhotoFile(id)
                 installed.add(id)
                 require(source.copyTo(target, overwrite = false).length() == source.length()) { "Photo copy failed" }
+                // Validate the installed copy, not only the staging source.
+                require(target.length() == source.length()) { "Installed photo length mismatch" }
+                if (version == 2) {
+                    val expected = checksums?.getString(id) ?: error("Missing photo checksum")
+                    require(sha256(target) == expected) { "Installed photo checksum mismatch" }
+                }
             }
             val inserted = dao.insertIfAbsent(newRows)
             val insertedIds = newRows.filterIndexed { index, _ -> inserted[index] != -1L }
