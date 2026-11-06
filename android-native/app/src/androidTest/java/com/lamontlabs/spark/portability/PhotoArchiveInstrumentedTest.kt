@@ -268,6 +268,19 @@ class PhotoArchiveInstrumentedTest {
         assertFalse(file.exists())
     }
 
+    @Test fun missingZipCentralDirectoryCannotRestoreNewReflection() = runBlocking {
+        val original = row()
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        val incomplete = bytes.copyOf(bytes.size - 22)
+        try {
+            archive.importFrom(ByteArrayInputStream(incomplete))
+            fail("Expected missing central directory rejection")
+        } catch (_: Exception) { }
+        assertNull(db.reflectionDao().findById(original.id))
+    }
+
     @Test fun unsupportedVersionRejectsBeforeDatabaseWrites() = runBlocking {
         val original = row()
         db.reflectionDao().insert(original)
