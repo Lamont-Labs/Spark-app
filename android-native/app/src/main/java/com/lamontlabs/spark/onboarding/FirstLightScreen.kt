@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -29,7 +30,7 @@ private val pages = listOf(
 )
 
 @Composable
-fun FirstLightScreen(step: Int, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
+fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
     val page = pages[step.coerceIn(0, pages.lastIndex)]
     Column(
         modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 36.dp),
@@ -49,6 +50,23 @@ fun FirstLightScreen(step: Int, onNext: () -> Unit, onBack: () -> Unit, onSkip: 
                     fontWeight = FontWeight.SemiBold, lineHeight = 42.sp)
                 Text(page.description, style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        if (step == 1) {
+            Text("WHAT WOULD YOU LIKE MORE OF?", style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            listOf(
+                "GRATITUDE" to "Noticing the good",
+                "WINS" to "Celebrating my wins",
+                "CONFIDENCE" to "Building confidence",
+                "EVERYTHING" to "A little of everything"
+            ).forEach { (value, label) ->
+                FilterChip(
+                    selected = focus == value,
+                    onClick = { onFocus(value) },
+                    label = { Text(label) },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
         Spacer(Modifier.weight(0.65f))
