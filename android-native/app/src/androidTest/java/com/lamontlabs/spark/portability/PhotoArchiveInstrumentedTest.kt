@@ -115,7 +115,29 @@ class PhotoArchiveInstrumentedTest {
         assertEquals(existing, db.reflectionDao().findById(original.id))
     }
 
-    @Test fun tamperedChecksumRejectsBeforeDatabaseWrites() = runBlocking {
+    @Test fun changedPhotoChecksumRejectsBeforeDatabaseWrites() = runBlocking {
+        val id = UUID.randomUUID().toString()
+        photos.add(id)
+        val file = File(context.filesDir, "reflection-photos/$id.jpg")
+        file.parentFile!!.mkdirs()
+        file.writeBytes(byteArrayOf(1, 2, 3, 4))
+        val original = row(photoId = id)
+        db.reflectionDao().insert(original)
+        val bytes = archiveBytes()
+        db.reflectionDao().deleteById(original.id)
+        file.delete()
+        val corrupted = rewriteManifest(bytes) { root ->
+            root.getJSONObject("photo_sha256").put(id, "0".repeat(64))
+        }
+        try {
+            archive.importFrom(ByteArrayInputStream(corrupted))
+            fail("Expected checksum mismatch")
+        } catch (_: IllegalArgumentException) { }
+        assertNull(db.reflectionDao().findById(original.id))
+        assertFalse(file.exists())
+    }
+
+    @Test fun unsupportedVersionRejectsBeforeDatabaseWrites() = runBlocking {
         val original = row()
         db.reflectionDao().insert(original)
         val bytes = archiveBytes()
