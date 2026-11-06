@@ -3,6 +3,15 @@ package com.lamontlabs.spark.onboarding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,7 +51,16 @@ fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrit
             color = MaterialTheme.colorScheme.primary, letterSpacing = 1.6.sp)
         Text("${step + 1} OF ${pages.size}", style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.weight(0.35f))
+        if (step == 4) {
+            Box(modifier = Modifier.fillMaxWidth().height(132.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(122.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape))
+                Box(Modifier.size(78.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape))
+                Text("✦", style = MaterialTheme.typography.displayLarge,
+                    color = MaterialTheme.colorScheme.primary)
+            }
+        } else {
+            Spacer(Modifier.weight(0.35f))
+        }
         Surface(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.primaryContainer) {
             Column(modifier = Modifier.fillMaxWidth().padding(28.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -100,15 +118,24 @@ fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrit
                 )
             }
         }
+        if (step == 4) {
+            Text("Your first moment is just the beginning.",
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary)
+        }
         Spacer(Modifier.weight(0.65f))
         Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {
-            Text(if (step == pages.lastIndex) "Enter Spark" else "Continue")
+            Text(if (step == pages.lastIndex) "Open my Spark" else "Continue")
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (step > 0) {
                 OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) { Text("Back") }
             }
-            OutlinedButton(onClick = onSkip, modifier = Modifier.weight(1f)) { Text("Skip introduction") }
+            if (step < pages.lastIndex) {
+                OutlinedButton(onClick = onSkip, modifier = Modifier.weight(1f)) { Text("Skip introduction") }
+            }
         }
     }
 }
