@@ -1,42 +1,89 @@
 package com.lamontlabs.spark.design
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 data class SparkMoment(val title: String, val description: String)
 
 @Composable
 fun SparkMomentCard(moment: SparkMoment, modifier: Modifier = Modifier) {
+    val isWin = moment.title == "Daily Win"
+    val isAffirm = moment.title == "Affirmation"
+    val accent = when {
+        isWin -> MaterialTheme.colorScheme.secondary
+        isAffirm -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.primary
+    }
+    val icon = when {
+        isWin -> Icons.Filled.StarOutline
+        isAffirm -> Icons.Filled.AutoAwesome
+        else -> Icons.Filled.FavoriteBorder
+    }
+    val category = when {
+        isWin -> "CELEBRATE YOURSELF"
+        isAffirm -> "A THOUGHT TO CARRY"
+        else -> "NOTICE THE GOOD"
+    }
     Card(
-        modifier = modifier.fillMaxWidth().heightIn(min = 120.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        modifier = modifier.fillMaxWidth().heightIn(min = 160.dp),
+        shape = RoundedCornerShape(28.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isAffirm) MaterialTheme.colorScheme.primaryContainer
+                else MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 21.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text(
-                text = moment.title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = moment.description,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(shape = CircleShape, color = accent.copy(alpha = 0.12f)) {
+                    Icon(icon, contentDescription = null, tint = accent,
+                        modifier = Modifier.padding(11.dp).size(22.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+                Text(category, style = MaterialTheme.typography.labelSmall,
+                    letterSpacing = 1.3.sp, color = accent, fontWeight = FontWeight.SemiBold)
+            }
+            Text(moment.title, style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+            Text(moment.description, style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 24.sp)
+            if (!isAffirm) {
+                Text("TAP TO REFLECT", style = MaterialTheme.typography.labelSmall,
+                    color = accent, letterSpacing = 1.1.sp)
+            }
         }
     }
 }
