@@ -10,6 +10,10 @@ import com.lamontlabs.spark.data.ReflectionRepository
 import com.lamontlabs.spark.data.SparkDatabase
 import com.lamontlabs.spark.design.SparkTheme
 import com.lamontlabs.spark.navigation.SparkNavigation
+import com.lamontlabs.spark.editor.ReflectionEditor
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.lamontlabs.spark.onboarding.FirstLightScreen
 import com.lamontlabs.spark.onboarding.OnboardingPreferences
 import androidx.compose.runtime.collectAsState
@@ -32,13 +36,22 @@ class MainActivity : ComponentActivity() {
                     val step by onboarding.step.collectAsState(initial = 0)
                     val focus by onboarding.focus.collectAsState(initial = "EVERYTHING")
                     val scope = rememberCoroutineScope()
+                    var onboardingEditor by rememberSaveable { mutableStateOf<String?>(null) }
                     when (completed) {
                         null -> Unit
                         true -> SparkNavigation(repository)
-                        false -> FirstLightScreen(
+                        false -> if (onboardingEditor != null) {
+                            ReflectionEditor(
+                                kind = onboardingEditor!!,
+                                repository = repository,
+                                onSaved = { onboardingEditor = null; scope.launch { onboarding.setStep(3) } },
+                                onCancel = { onboardingEditor = null }
+                            )
+                        } else FirstLightScreen(
                             step = step,
                             focus = focus,
                             onFocus = { selected -> scope.launch { onboarding.setFocus(selected) } },
+                            onWrite = { kind -> onboardingEditor = kind },
                             onNext = { scope.launch { if (step >= 4) onboarding.finish() else onboarding.setStep(step + 1) } },
                             onBack = { scope.launch { onboarding.setStep(step - 1) } },
                             onSkip = { scope.launch { onboarding.finish() } }
