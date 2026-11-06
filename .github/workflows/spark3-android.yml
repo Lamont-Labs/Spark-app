@@ -29,6 +29,9 @@ jobs:
       - name: Run local unit tests
         working-directory: android-native
         run: gradle --no-daemon :app:testDebugUnitTest
+      - name: Compile Android integration tests
+        working-directory: android-native
+        run: gradle --no-daemon :app:assembleDebugAndroidTest
       - name: Compile debug APK
         working-directory: android-native
         run: gradle --no-daemon :app:assembleDebug
