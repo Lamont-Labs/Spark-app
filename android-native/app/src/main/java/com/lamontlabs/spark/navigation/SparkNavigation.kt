@@ -1,5 +1,12 @@
 package com.lamontlabs.spark.navigation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.semantics.Role
@@ -103,13 +110,23 @@ fun SparkNavigation(repository: ReflectionRepository) {
             }
         }
     ) { padding ->
-        when (destination) {
-            Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, Modifier.padding(padding), onEdit = { editingKind = it })
-            Destination.JOURNAL -> JournalScreen(repository, Modifier.padding(padding))
-            Destination.AFFIRM -> AffirmScreen(Modifier.padding(padding))
-            Destination.YOU -> Column(modifier = Modifier.padding(padding)) {
-                TextButton(onClick = { privacyOpen = true }) { Text("Privacy & preferences") }
-                ProgressScreen(repository)
+        AnimatedContent(
+            targetState = destination,
+            modifier = Modifier.fillMaxSize().padding(padding),
+            transitionSpec = {
+                fadeIn(animationSpec = tween(220)) togetherWith
+                    fadeOut(animationSpec = tween(110))
+            },
+            label = "Spark destination transition"
+        ) { active ->
+            when (active) {
+                Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, Modifier, onEdit = { editingKind = it })
+                Destination.JOURNAL -> JournalScreen(repository, Modifier)
+                Destination.AFFIRM -> AffirmScreen(Modifier)
+                Destination.YOU -> Column {
+                    TextButton(onClick = { privacyOpen = true }) { Text("Privacy & preferences") }
+                    ProgressScreen(repository)
+                }
             }
         }
     }
