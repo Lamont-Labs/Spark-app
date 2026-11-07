@@ -4,7 +4,7 @@
     <application
         android:allowBackup="false"
         android:fullBackupContent="false"
-        android:label="Spark"
+        android:label="Spark 3 Preview"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
