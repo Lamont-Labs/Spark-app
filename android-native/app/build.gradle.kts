@@ -10,11 +10,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.lamontlabs.spark"
+        applicationId = "com.lamontlabs.spark.preview"
         minSdk = 26
         targetSdk = 35
-        versionCode = 45
-        versionName = "3.0.0-preview.45"
+        versionCode = 46
+        versionName = "3.0.0-preview.46"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
