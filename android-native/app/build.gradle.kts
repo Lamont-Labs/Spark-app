@@ -13,8 +13,8 @@ android {
         applicationId = "com.lamontlabs.spark"
         minSdk = 26
         targetSdk = 35
-        versionCode = 30
-        versionName = "3.0.0-dev"
+        versionCode = 45
+        versionName = "3.0.0-preview.45"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
