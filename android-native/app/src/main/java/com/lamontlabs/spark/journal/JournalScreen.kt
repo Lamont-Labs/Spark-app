@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Brush
 import com.lamontlabs.spark.design.SparkPalette
+import com.lamontlabs.spark.design.SparkGlassSurface
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -75,10 +76,8 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
         }
         if (reflections.isEmpty()) {
             item {
-                Surface(shape = RoundedCornerShape(28.dp),
-                    color = SparkPalette.NightCard,
-                    border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.25f))) {
-                    Column(modifier = Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(SparkPalette.RaisedCard, SparkPalette.NightCard))).padding(24.dp),
+                SparkGlassSurface(modifier = Modifier.fillMaxWidth(), prominent = true) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text("A beautiful beginning", style = MaterialTheme.typography.titleLarge, color = SparkPalette.Ice)
                         Text("Your gratitude and daily wins will find a home here. Start with one small moment on Today.",
@@ -100,12 +99,7 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
             items(entries, key = { it.id }) { reflection ->
                 val gratitude = reflection.kind == "GRATITUDE"
                 val accent = if (gratitude) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(26.dp),
-                    border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.18f)),
-                    colors = CardDefaults.cardColors(containerColor = SparkPalette.NightCard)
-                ) {
+                SparkGlassSurface(modifier = Modifier.fillMaxWidth(), accent = accent) {
                     Column(modifier = Modifier.padding(21.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
