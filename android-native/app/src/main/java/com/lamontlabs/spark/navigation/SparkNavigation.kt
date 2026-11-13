@@ -59,6 +59,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.lamontlabs.spark.onboarding.OnboardingPreferences
 import com.lamontlabs.spark.design.SparkMoment
+import com.lamontlabs.spark.design.SparkPalette
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Brush
 import com.lamontlabs.spark.design.SparkMomentCard
 
 private enum class Destination(val label: String) {
@@ -151,7 +154,7 @@ private fun TodayDestination(repository: ReflectionRepository, resurfacingEnable
         SparkMoment("Affirmation", "I can grow at my own pace.")
     )
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().background(SparkPalette.Void),
         contentPadding = PaddingValues(start = 22.dp, end = 22.dp, top = 24.dp, bottom = 36.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
@@ -173,10 +176,10 @@ private fun TodayDestination(repository: ReflectionRepository, resurfacingEnable
         item {
             Surface(
                 shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = SparkPalette.NightCard,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(modifier = Modifier.background(Brush.linearGradient(listOf(SparkPalette.RaisedCard, SparkPalette.NightCard, SparkPalette.Midnight))).padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("YOUR MOMENT OF PAUSE", style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary, letterSpacing = 1.5.sp)
                     Text("What felt good today?", style = MaterialTheme.typography.headlineSmall,
