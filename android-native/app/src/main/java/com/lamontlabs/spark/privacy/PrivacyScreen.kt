@@ -20,6 +20,8 @@ import com.lamontlabs.spark.portability.PhotoArchive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.background
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.lamontlabs.spark.design.SparkPalette
 import com.lamontlabs.spark.design.SparkGlassSurface
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +65,7 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
     val photoArchive = remember(context) { PhotoArchive(context, SparkDatabase.get(context).reflectionDao()) }
     var message by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var showLegacyBackup by rememberSaveable { mutableStateOf(false) }
     val exportPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) scope.launch {
             busy = true
@@ -177,14 +180,24 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("BACKUP & RESTORE", style = MaterialTheme.typography.labelSmall,
                     color = SparkPalette.Cyan)
-        Text("Complete backup with photos (unencrypted ZIP)", style = MaterialTheme.typography.titleMedium)
-        Text("Includes reflection text and private photo files. Keep this ZIP somewhere secure. Existing entries are never overwritten.", style = MaterialTheme.typography.bodySmall)
-        Button(onClick = { photoExportPicker.launch("spark-complete-backup.zip") }, enabled = !busy) { Text("Export complete backup") }
-        OutlinedButton(onClick = { photoImportPicker.launch(arrayOf("application/zip", "application/octet-stream")) }, enabled = !busy) { Text("Restore complete backup") }
-        Text("Legacy text-only backup (unencrypted)", style = MaterialTheme.typography.titleMedium)
-        Text("Backups contain private journal text. Photos are not included. Export refuses photo-only entries. Import never overwrites matching IDs.", style = MaterialTheme.typography.bodySmall)
-        Button(onClick = { exportPicker.launch("spark-reflections.json") }, enabled = !busy) { Text("Export reflections") }
-        OutlinedButton(onClick = { importPicker.launch(arrayOf("application/json", "text/plain")) }, enabled = !busy) { Text("Import reflections") }
+        Text("Complete backup · ZIP", style = MaterialTheme.typography.titleMedium, color = SparkPalette.Ice)
+        Text("Includes your reflections and photos. The ZIP is not encrypted; store it somewhere private. Restoring never overwrites matching entries.", style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Button(onClick = { photoExportPicker.launch("spark-complete-backup.zip") }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Export ZIP") }
+            OutlinedButton(onClick = { photoImportPicker.launch(arrayOf("application/zip", "application/octet-stream")) }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Restore ZIP") }
+        }
+        HorizontalDivider(color = SparkPalette.Hairline.copy(alpha = 0.4f))
+        OutlinedButton(onClick = { showLegacyBackup = !showLegacyBackup }, modifier = Modifier.fillMaxWidth()) {
+            Text(if (showLegacyBackup) "Hide text-only backup" else "Show text-only backup (legacy)")
+        }
+        if (showLegacyBackup) {
+            Text("Text-only backup · JSON", style = MaterialTheme.typography.titleMedium, color = SparkPalette.Ice)
+            Text("Unencrypted journal text only; photos are excluded. Export refuses photo-only entries. Import never overwrites matching IDs.", style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(onClick = { exportPicker.launch("spark-reflections.json") }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Export JSON") }
+                OutlinedButton(onClick = { importPicker.launch(arrayOf("application/json", "text/plain")) }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Import JSON") }
+            }
+        }
             }
         }
         message?.let { Text(it, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }, style = MaterialTheme.typography.bodySmall) }
