@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.material3.CardDefaults
 import com.lamontlabs.spark.design.SparkPalette
+import com.lamontlabs.spark.design.SparkGlassSurface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,10 +52,8 @@ fun AffirmScreen(modifier: Modifier = Modifier) {
             Text("A quiet reminder for today", style = MaterialTheme.typography.bodyLarge, color = SparkPalette.MutedBlue)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(26.dp),
-                border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.25f)),
-                colors = CardDefaults.cardColors(containerColor = SparkPalette.NightCard)) {
-                Column(modifier = Modifier.background(Brush.linearGradient(listOf(SparkPalette.RaisedCard, SparkPalette.NightCard))).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SparkGlassSurface(modifier = Modifier.fillMaxWidth(), prominent = true) {
+                Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("TODAY'S AFFIRMATION", style = MaterialTheme.typography.labelMedium, color = SparkPalette.Cyan)
                     Text(featured, style = MaterialTheme.typography.headlineSmall, color = SparkPalette.Ice)
                 }
@@ -62,7 +61,7 @@ fun AffirmScreen(modifier: Modifier = Modifier) {
         }
         item { Text("Explore more", style = MaterialTheme.typography.titleLarge, color = SparkPalette.Ice) }
         items(affirmations, key = { it }) { affirmation ->
-            Card(modifier = Modifier.fillMaxWidth()) {
+            SparkGlassSurface(modifier = Modifier.fillMaxWidth(), accent = SparkPalette.Electric) {
                 Text(affirmation, modifier = Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge, color = SparkPalette.Ice)
             }
         }
