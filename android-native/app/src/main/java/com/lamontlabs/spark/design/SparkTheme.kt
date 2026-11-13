@@ -1,6 +1,5 @@
 package com.lamontlabs.spark.design
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -13,48 +12,61 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
+// Spark visual identity v1: cinematic midnight, electric cyan, quiet reflective surfaces.
+// Legacy palette aliases are retained until all existing screens are migrated.
 object SparkPalette {
-    val Ivory = Color(0xFFFAF6F0)
-    val Paper = Color(0xFFFFFDF9)
-    val Ink = Color(0xFF29243A)
-    val MutedInk = Color(0xFF514657)
-    val Peach = Color(0xFFDDA58F)
-    val Lavender = Color(0xFF9881C7)
-    val Midnight = Color(0xFF101225)
-    val NightCard = Color(0xFF22243C)
-    val Apricot = Color(0xFFF2B58C)
-    val NightLavender = Color(0xFFB5A0EF)
-    val NightIvory = Color(0xFFF7F1EC)
+    val Void = Color(0xFF010916)
+    val Midnight = Color(0xFF041B36)
+    val NightCard = Color(0xFF0A2543)
+    val RaisedCard = Color(0xFF103153)
+    val Electric = Color(0xFF008DFF)
+    val Cyan = Color(0xFF22DFFF)
+    val Ice = Color(0xFFE8FAFF)
+    val MutedBlue = Color(0xFFB3CCDD)
+    val Hairline = Color(0xFF54758E)
+
+    // Transitional aliases for previously implemented screens.
+    val Ivory = Ice
+    val Paper = Color(0xFFF4FAFF)
+    val Ink = Color(0xFF071A2D)
+    val MutedInk = Color(0xFF365267)
+    val Peach = Cyan
+    val Lavender = Electric
+    val Apricot = Cyan
+    val NightLavender = Cyan
+    val NightIvory = Ice
 }
 
 private val LightColors = lightColorScheme(
-    primary = Color(0xFF654B8D),
+    primary = Color(0xFF005DAF),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFEEE7F7),
+    primaryContainer = Color(0xFFD8EEFF),
     onPrimaryContainer = SparkPalette.Ink,
-    secondary = Color(0xFF86534A),
+    secondary = Color(0xFF006C80),
     onSecondary = Color.White,
-    background = SparkPalette.Ivory,
+    background = Color(0xFFF1F8FF),
     onBackground = SparkPalette.Ink,
-    surface = SparkPalette.Paper,
+    surface = Color.White,
     onSurface = SparkPalette.Ink,
     onSurfaceVariant = SparkPalette.MutedInk,
-    outline = Color(0xFF807681)
+    outline = Color(0xFF567083)
 )
 
 private val DarkColors = darkColorScheme(
-    primary = SparkPalette.NightLavender,
-    onPrimary = SparkPalette.Midnight,
-    primaryContainer = Color(0xFF39304D),
-    onPrimaryContainer = SparkPalette.NightIvory,
-    secondary = SparkPalette.Apricot,
-    onSecondary = SparkPalette.Midnight,
-    background = SparkPalette.Midnight,
-    onBackground = SparkPalette.NightIvory,
+    primary = SparkPalette.Cyan,
+    onPrimary = SparkPalette.Void,
+    primaryContainer = SparkPalette.RaisedCard,
+    onPrimaryContainer = SparkPalette.Ice,
+    secondary = SparkPalette.Electric,
+    onSecondary = SparkPalette.Void,
+    background = SparkPalette.Void,
+    onBackground = SparkPalette.Ice,
     surface = SparkPalette.NightCard,
-    onSurface = SparkPalette.NightIvory,
-    onSurfaceVariant = Color(0xFFD5CDDC),
-    outline = Color(0xFFB9AEC7)
+    onSurface = SparkPalette.Ice,
+    onSurfaceVariant = SparkPalette.MutedBlue,
+    outline = SparkPalette.Hairline,
+    surfaceVariant = SparkPalette.RaisedCard,
+    outlineVariant = Color(0xFF2B4A65)
 )
 
 object SparkSpacing {
@@ -103,7 +115,7 @@ private val SparkTypography = Typography().let { base ->
 
 @Composable
 fun SparkTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
