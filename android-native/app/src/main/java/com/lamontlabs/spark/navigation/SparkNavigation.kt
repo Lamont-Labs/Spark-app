@@ -221,18 +221,13 @@ private fun TodayDestination(
             }
         }
         item {
-            Surface(
+            SparkGlassSurface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                color = SparkPalette.NightCard,
-                border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.32f))
+                accent = SparkPalette.Cyan,
+                prominent = true
             ) {
                 Column(
-                    modifier = Modifier
-                        .background(Brush.linearGradient(listOf(
-                            SparkPalette.RaisedCard, SparkPalette.NightCard, SparkPalette.Midnight
-                        )))
-                        .padding(24.dp),
+                    modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(13.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically,
