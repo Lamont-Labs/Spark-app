@@ -159,7 +159,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
         ) { active ->
             when (active) {
                 Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, focus, Modifier,
-                    onEdit = { editingKind = it }, onAffirm = { selected = Destination.AFFIRM.name })
+                    onEdit = { editingKind = it }, onAffirm = { selected = Destination.AFFIRM.name }, onJournal = { selected = Destination.JOURNAL.name })
                 Destination.JOURNAL -> JournalScreen(repository, Modifier)
                 Destination.AFFIRM -> AffirmScreen(Modifier)
                 Destination.YOU -> Column {
@@ -178,7 +178,8 @@ private fun TodayDestination(
     focus: String,
     modifier: Modifier,
     onEdit: (String) -> Unit,
-    onAffirm: () -> Unit
+    onAffirm: () -> Unit,
+    onJournal: () -> Unit
 ) {
     val today = java.time.LocalDate.now()
     val dateLabel = today.format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d"))
@@ -255,15 +256,15 @@ private fun TodayDestination(
             }
         }
         item {
-            Text("MAKE IT YOURS", style = MaterialTheme.typography.labelSmall,
+            Text("KEEP GOING", style = MaterialTheme.typography.labelSmall,
                 color = SparkPalette.MutedBlue, letterSpacing = 1.6.sp)
         }
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 TodayQuickAction(
-                    title = "Gratitude", subtitle = "Notice the good",
-                    icon = Icons.Filled.FavoriteBorder,
-                    modifier = Modifier.weight(1f), onClick = { onEdit("GRATITUDE") }
+                    title = "Your journal", subtitle = "Revisit your moments",
+                    icon = Icons.Filled.List,
+                    modifier = Modifier.weight(1f), onClick = onJournal
                 )
                 TodayQuickAction(
                     title = "Daily win", subtitle = "Celebrate progress",
