@@ -28,6 +28,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -93,7 +97,11 @@ fun SparkNavigation(repository: ReflectionRepository) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            NavigationBar(
+                containerColor = SparkPalette.Midnight,
+                tonalElevation = 0.dp,
+                modifier = Modifier.height(76.dp)
+            ) {
                 Destination.entries.forEach { item ->
                     NavigationBarItem(
                         selected = destination == item,
@@ -110,7 +118,14 @@ fun SparkNavigation(repository: ReflectionRepository) {
                             )
                         },
                         label = { Text(item.label) },
-                        alwaysShowLabel = true
+                        alwaysShowLabel = true,
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = SparkPalette.Void,
+                            selectedTextColor = SparkPalette.Cyan,
+                            indicatorColor = SparkPalette.Cyan,
+                            unselectedIconColor = SparkPalette.MutedBlue,
+                            unselectedTextColor = SparkPalette.MutedBlue
+                        )
                     )
                 }
             }
@@ -120,8 +135,8 @@ fun SparkNavigation(repository: ReflectionRepository) {
             targetState = destination,
             modifier = Modifier.fillMaxSize().padding(padding),
             transitionSpec = {
-                fadeIn(animationSpec = tween(220)) togetherWith
-                    fadeOut(animationSpec = tween(110))
+                fadeIn(animationSpec = tween(180)) togetherWith
+                    fadeOut(animationSpec = tween(100))
             },
             label = "Spark destination transition"
         ) { active ->
