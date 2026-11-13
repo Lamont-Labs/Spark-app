@@ -9,6 +9,16 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.StarOutline
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
@@ -139,69 +149,83 @@ fun SparkNavigation(repository: ReflectionRepository) {
                     fadeOut(animationSpec = tween(100))
             },
             label = "Spark destination transition"
-        ) { active ->
-            when (active) {
-                Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, focus, Modifier, onEdit = { editingKind = it })
-                Destination.JOURNAL -> JournalScreen(repository, Modifier)
-                Destination.AFFIRM -> AffirmScreen(Modifier)
-                Destination.YOU -> Column {
-                    TextButton(onClick = { privacyOpen = true }) { Text("Privacy & preferences") }
-                    ProgressScreen(repository)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TodayDestination(repository: ReflectionRepository, resurfacingEnabled: Boolean, focus: String, modifier: Modifier, onEdit: (String) -> Unit) {
+        ) { active -@Composable
+private fun TodayDestination(
+    repository: ReflectionRepository,
+    resurfacingEnabled: Boolean,
+    focus: String,
+    modifier: Modifier,
+    onEdit: (String) -> Unit,
+    onAffirm: () -> Unit
+) {
     val today = java.time.LocalDate.now()
     val dateLabel = today.format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d"))
     val focusLine = when (focus) {
-        "GRATITUDE" -> "There is good worth noticing."
-        "WINS" -> "Your progress deserves recognition."
-        "CONFIDENCE" -> "Give yourself room to grow."
-        else -> "Take a moment. The rest can wait."
+        "GRATITUDE" -> "Notice something worth keeping."
+        "WINS" -> "Your progress is worth recognizing."
+        "CONFIDENCE" -> "Grow at your own pace."
+        else -> "A moment for what matters."
     }
-    val moments = listOf(
-        SparkMoment("Gratitude", "What brought a little light into your day?"),
-        SparkMoment("Daily Win", "What deserves a little credit today?"),
-        SparkMoment("Affirmation", "I can grow at my own pace.")
-    )
     LazyColumn(
         modifier = modifier.fillMaxSize().background(SparkPalette.Void),
-        contentPadding = PaddingValues(start = 22.dp, end = 22.dp, top = 24.dp, bottom = 36.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    "SPARK  /  TODAY",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    letterSpacing = 2.sp
-                )
-                Text(dateLabel, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("A little good,\\na little every day.".replace("\\n", "\n"), style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.SemiBold, lineHeight = 42.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("SPARK  /  TODAY", style = MaterialTheme.typography.labelMedium,
+                        color = SparkPalette.Cyan, letterSpacing = 1.8.sp)
+                    Text(dateLabel, style = MaterialTheme.typography.bodyMedium,
+                        color = SparkPalette.MutedBlue)
+                }
+                Surface(shape = CircleShape, color = SparkPalette.RaisedCard) {
+                    Icon(Icons.Filled.AutoAwesome, contentDescription = null,
+                        tint = SparkPalette.Cyan, modifier = Modifier.padding(13.dp).size(22.dp))
+                }
+            }
+        }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text("Find your spark.", style = MaterialTheme.typography.headlineLarge,
+                    color = SparkPalette.Ice, fontWeight = FontWeight.Bold)
                 Text(focusLine, style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = SparkPalette.MutedBlue)
             }
         }
         item {
             Surface(
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
                 color = SparkPalette.NightCard,
-                modifier = Modifier.fillMaxWidth()
+                border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.32f))
             ) {
-                Column(modifier = Modifier.background(Brush.linearGradient(listOf(SparkPalette.RaisedCard, SparkPalette.NightCard, SparkPalette.Midnight))).padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("YOUR MOMENT OF PAUSE", style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary, letterSpacing = 1.5.sp)
-                    Text("What felt good today?", style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold)
-                    Text("It doesn't need to be a big thing.", style = MaterialTheme.typography.bodyMedium)
-                    Button(onClick = { onEdit("GRATITUDE") }) {
-                        Text("Capture a gratitude")
+                Column(
+                    modifier = Modifier
+                        .background(Brush.linearGradient(listOf(
+                            SparkPalette.RaisedCard, SparkPalette.NightCard, SparkPalette.Midnight
+                        )))
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(13.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.Filled.AutoAwesome, contentDescription = null,
+                            tint = SparkPalette.Cyan, modifier = Modifier.size(17.dp))
+                        Text("A MOMENT WORTH KEEPING", style = MaterialTheme.typography.labelSmall,
+                            color = SparkPalette.Cyan, letterSpacing = 1.4.sp)
+                    }
+                    Text("What was good today?", style = MaterialTheme.typography.headlineSmall,
+                        color = SparkPalette.Ice, fontWeight = FontWeight.SemiBold)
+                    Text("One small thing is enough.", style = MaterialTheme.typography.bodyMedium,
+                        color = SparkPalette.MutedBlue)
+                    Button(onClick = { onEdit("GRATITUDE") },
+                        modifier = Modifier.fillMaxWidth()) {
+                        Text("Capture a moment")
                         Spacer(Modifier.width(8.dp))
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
                     }
@@ -209,15 +233,82 @@ private fun TodayDestination(repository: ReflectionRepository, resurfacingEnable
             }
         }
         item {
-            Text("MAKE SPACE FOR THE GOOD", style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 1.5.sp)
+            Text("MAKE IT YOURS", style = MaterialTheme.typography.labelSmall,
+                color = SparkPalette.MutedBlue, letterSpacing = 1.6.sp)
         }
-        items(moments, key = { it.title }) { moment ->
-            if (moment.title == "Affirmation") {
-                SparkMomentCard(moment)
-            } else {
-                SparkMomentCard(
-                    moment,
+        item {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                TodayQuickAction(
+                    title = "Gratitude", subtitle = "Notice the good",
+                    icon = Icons.Filled.FavoriteBorder,
+                    modifier = Modifier.weight(1f), onClick = { onEdit("GRATITUDE") }
+                )
+                TodayQuickAction(
+                    title = "Daily win", subtitle = "Celebrate progress",
+                    icon = Icons.Filled.StarOutline,
+                    modifier = Modifier.weight(1f), onClick = { onEdit("WIN") }
+                )
+            }
+        }
+        item {
+            Surface(
+                modifier = Modifier.fillMaxWidth().clickable(role = Role.Button,
+                    onClickLabel = "Open affirmations", onClick = onAffirm),
+                shape = RoundedCornerShape(22.dp),
+                color = SparkPalette.NightCard,
+                border = BorderStroke(1.dp, SparkPalette.Hairline.copy(alpha = 0.28f))
+            ) {
+                Row(modifier = Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Icon(Icons.Filled.AutoAwesome, contentDescription = null,
+                        tint = SparkPalette.Cyan, modifier = Modifier.size(26.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Words to carry", style = MaterialTheme.typography.titleMedium,
+                            color = SparkPalette.Ice)
+                        Text("A gentle affirmation for today",
+                            style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+                    }
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null,
+                        tint = SparkPalette.Cyan)
+                }
+            }
+        }
+        if (resurfacingEnabled) {
+            item { ResurfacingCard(repository) }
+        }
+        item {
+            Text("No pressure. No perfect days required.",
+                style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+        }
+    }
+}
+
+@Composable
+private fun TodayQuickAction(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = modifier.clickable(role = Role.Button, onClickLabel = title, onClick = onClick),
+        shape = RoundedCornerShape(22.dp),
+        color = SparkPalette.NightCard,
+        border = BorderStroke(1.dp, SparkPalette.Hairline.copy(alpha = 0.28f))
+    ) {
+        Column(modifier = Modifier.padding(17.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Icon(icon, contentDescription = null, tint = SparkPalette.Cyan,
+                modifier = Modifier.size(25.dp))
+            Text(title, style = MaterialTheme.typography.titleMedium, color = SparkPalette.Ice)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall,
+                color = SparkPalette.MutedBlue, maxLines = 2)
+        }
+    }
+}
+
+       moment,
                     modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = "Write ${moment.title}") {
                         onEdit(if (moment.title == "Gratitude") "GRATITUDE" else "WIN")
                     }
