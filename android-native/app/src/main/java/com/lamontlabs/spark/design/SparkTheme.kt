@@ -4,6 +4,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Typography
+import androidx.compose.material3.Shapes
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
@@ -51,6 +57,50 @@ private val DarkColors = darkColorScheme(
     outline = Color(0xFFB9AEC7)
 )
 
+object SparkSpacing {
+    val Xs = 4.dp
+    val Sm = 8.dp
+    val Md = 12.dp
+    val Lg = 16.dp
+    val Xl = 24.dp
+    val Xxl = 32.dp
+}
+
+object SparkMotion {
+    const val QuickMs = 120
+    const val StandardMs = 220
+    const val DeliberateMs = 320
+}
+
+private val SparkShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(28.dp)
+)
+
+private val SparkTypography = Typography().let { base ->
+    base.copy(
+        headlineLarge = base.headlineLarge.copy(
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = (-0.7).sp,
+            lineHeight = 40.sp
+        ),
+        headlineSmall = base.headlineSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = (-0.3).sp
+        ),
+        titleLarge = base.titleLarge.copy(
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = (-0.2).sp
+        ),
+        labelMedium = base.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+        bodyLarge = base.bodyLarge.copy(lineHeight = 25.sp),
+        bodyMedium = base.bodyMedium.copy(lineHeight = 22.sp)
+    )
+}
+
 @Composable
 fun SparkTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -58,6 +108,8 @@ fun SparkTheme(
 ) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
+        shapes = SparkShapes,
+        typography = SparkTypography,
         content = content
     )
 }
