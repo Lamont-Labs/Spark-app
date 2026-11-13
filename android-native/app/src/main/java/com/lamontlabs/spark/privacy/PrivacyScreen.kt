@@ -126,6 +126,11 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
         Text("YOUR SPACE  /  PRIVACY", style = MaterialTheme.typography.labelMedium, color = SparkPalette.Cyan)
         Text("Your data. Your choices.", style = MaterialTheme.typography.headlineLarge, color = SparkPalette.Ice, fontWeight = FontWeight.SemiBold)
         Text("Your reflections are saved in Spark's private app storage on this device.", style = MaterialTheme.typography.bodyLarge)
+        SparkGlassSurface(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("YOUR MOMENTS", style = MaterialTheme.typography.labelSmall,
+                    color = SparkPalette.Cyan)
         androidx.compose.foundation.layout.Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -137,6 +142,13 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
             Switch(checked = enabled, onCheckedChange = { next -> scope.launch { preferences.setResurfacingEnabled(next) } })
         }
         Text("No account or cloud sync is required. This setting stays on your device.", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        SparkGlassSurface(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("GENTLE REMINDERS", style = MaterialTheme.typography.labelSmall,
+                    color = SparkPalette.Cyan)
         Text("Gentle daily reminder", style = MaterialTheme.typography.titleMedium)
         Text("Optional, local and never includes your journal text. Delivery time is approximate.", style = MaterialTheme.typography.bodySmall)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -158,6 +170,13 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
             }
         })
         Text(if (remindersEnabled) "Reminders enabled" else "Reminders off", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        SparkGlassSurface(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("BACKUP & RESTORE", style = MaterialTheme.typography.labelSmall,
+                    color = SparkPalette.Cyan)
         Text("Complete backup with photos (unencrypted ZIP)", style = MaterialTheme.typography.titleMedium)
         Text("Includes reflection text and private photo files. Keep this ZIP somewhere secure. Existing entries are never overwritten.", style = MaterialTheme.typography.bodySmall)
         Button(onClick = { photoExportPicker.launch("spark-complete-backup.zip") }, enabled = !busy) { Text("Export complete backup") }
@@ -166,6 +185,8 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
         Text("Backups contain private journal text. Photos are not included. Export refuses photo-only entries. Import never overwrites matching IDs.", style = MaterialTheme.typography.bodySmall)
         Button(onClick = { exportPicker.launch("spark-reflections.json") }, enabled = !busy) { Text("Export reflections") }
         OutlinedButton(onClick = { importPicker.launch(arrayOf("application/json", "text/plain")) }, enabled = !busy) { Text("Import reflections") }
+            }
+        }
         message?.let { Text(it, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }, style = MaterialTheme.typography.bodySmall) }
         Text("Uninstalling Spark may erase locally stored reflections. Keep backups somewhere you control.", style = MaterialTheme.typography.bodySmall)
     }
