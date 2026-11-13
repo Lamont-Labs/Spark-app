@@ -1,6 +1,7 @@
 package com.lamontlabs.spark.progress
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,7 +27,7 @@ import com.lamontlabs.spark.design.SparkPalette
 import java.time.LocalDate
 
 @Composable
-fun ProgressScreen(repository: ReflectionRepository, modifier: Modifier = Modifier) {
+fun ProgressScreen(repository: ReflectionRepository, modifier: Modifier = Modifier, onPrivacy: () -> Unit = {}) {
     val flow = remember(repository) { repository.observeAll() }
     val reflections by flow.collectAsState(initial = emptyList())
     val progress = ProgressCalculator.calculate(reflections, LocalDate.now())
@@ -72,6 +74,22 @@ fun ProgressScreen(repository: ReflectionRepository, modifier: Modifier = Modifi
                     Text("${progress.longestGentleStreak} active days",
                         style = MaterialTheme.typography.titleLarge, color = SparkPalette.Ice)
                     Text("A gentle streak allows one missed day between reflection days. Missed days never count as active days.",
+                        style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+                }
+            }
+        }
+        item {
+            SparkGlassSurface(modifier = Modifier.fillMaxWidth().clickable(
+                role = Role.Button, onClickLabel = "Open privacy and preferences",
+                onClick = onPrivacy
+            )) {
+                Column(modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("PRIVACY & PREFERENCES", style = MaterialTheme.typography.labelSmall,
+                        color = SparkPalette.Cyan, letterSpacing = 1.1.sp)
+                    Text("Your space, your choices", style = MaterialTheme.typography.titleMedium,
+                        color = SparkPalette.Ice)
+                    Text("Manage your private experience and resurfacing preferences.",
                         style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
                 }
             }
