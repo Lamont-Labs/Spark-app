@@ -1,6 +1,9 @@
 package com.lamontlabs.spark.journal
 
 import android.graphics.BitmapFactory
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Brush
+import com.lamontlabs.spark.design.SparkPalette
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +54,7 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
     val dateFormat = remember { DateTimeFormatter.ofPattern("EEEE, MMMM d") }
     val grouped = remember(reflections) { reflections.groupBy { it.reflectionDate } }
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().background(SparkPalette.Void),
         contentPadding = PaddingValues(start = 22.dp, end = 22.dp, top = 28.dp, bottom = 40.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -60,7 +63,7 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
                 Text("YOUR STORY  /  JOURNAL", style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary, letterSpacing = 1.6.sp)
                 Text("The good you've kept.", style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.SemiBold)
+                    fontWeight = FontWeight.SemiBold, color = SparkPalette.Ice)
                 Text("Little moments become something meaningful over time.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -73,12 +76,13 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
         if (reflections.isEmpty()) {
             item {
                 Surface(shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(24.dp),
+                    color = SparkPalette.NightCard,
+                    border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.25f))) {
+                    Column(modifier = Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(SparkPalette.RaisedCard, SparkPalette.NightCard))).padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text("A beautiful beginning", style = MaterialTheme.typography.titleLarge)
+                        Text("A beautiful beginning", style = MaterialTheme.typography.titleLarge, color = SparkPalette.Ice)
                         Text("Your gratitude and daily wins will find a home here. Start with one small moment on Today.",
-                            style = MaterialTheme.typography.bodyLarge)
+                            style = MaterialTheme.typography.bodyLarge, color = SparkPalette.MutedBlue)
                     }
                 }
             }
@@ -99,8 +103,8 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(26.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.18f)),
+                    colors = CardDefaults.cardColors(containerColor = SparkPalette.NightCard)
                 ) {
                     Column(modifier = Modifier.padding(21.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)) {
