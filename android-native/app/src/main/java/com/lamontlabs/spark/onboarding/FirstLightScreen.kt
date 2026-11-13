@@ -25,6 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.Brush
+import com.lamontlabs.spark.design.SparkPalette
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,25 +48,32 @@ private val pages = listOf(
 fun FirstLightScreen(step: Int, focus: String, onFocus: (String) -> Unit, onWrite: (String) -> Unit, remindersEnabled: Boolean, reminderHour: Int, onReminderToggle: (Boolean) -> Unit, onReminderHour: (Int) -> Unit, reminderMessage: String?, onNext: () -> Unit, onBack: () -> Unit, onSkip: () -> Unit) {
     val page = pages[step.coerceIn(0, pages.lastIndex)]
     Column(
-        modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 28.dp, vertical = 24.dp),
+        modifier = Modifier.fillMaxSize().background(SparkPalette.Void).imePadding().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         Text("SPARK  /  FIRST LIGHT", style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary, letterSpacing = 1.6.sp)
-        Text("${step + 1} OF ${pages.size}", style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("${step.coerceIn(0, pages.lastIndex) + 1} OF ${pages.size}", style = MaterialTheme.typography.labelMedium,
+            color = SparkPalette.MutedBlue)
+        LinearProgressIndicator(
+            progress = { (step.coerceIn(0, pages.lastIndex) + 1).toFloat() / pages.size },
+            modifier = Modifier.fillMaxWidth().height(4.dp),
+            color = SparkPalette.Cyan,
+            trackColor = SparkPalette.RaisedCard
+        )
         if (step == 4) {
             Box(modifier = Modifier.fillMaxWidth().height(132.dp), contentAlignment = Alignment.Center) {
-                Box(Modifier.size(122.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape))
-                Box(Modifier.size(78.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape))
+                Box(Modifier.size(122.dp).background(SparkPalette.RaisedCard, CircleShape))
+                Box(Modifier.size(78.dp).background(SparkPalette.Electric.copy(alpha = 0.36f), CircleShape))
                 Text("✦", style = MaterialTheme.typography.displayLarge,
                     color = MaterialTheme.colorScheme.primary)
             }
         } else {
             Spacer(Modifier.height(36.dp))
         }
-        Surface(shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.primaryContainer) {
-            Column(modifier = Modifier.fillMaxWidth().padding(28.dp),
+        Surface(shape = RoundedCornerShape(28.dp), color = SparkPalette.NightCard,
+            border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.22f))) {
+            Column(modifier = Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(SparkPalette.RaisedCard, SparkPalette.NightCard, SparkPalette.Midnight))).padding(28.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 Text(page.eyebrow, style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary, letterSpacing = 1.3.sp)
