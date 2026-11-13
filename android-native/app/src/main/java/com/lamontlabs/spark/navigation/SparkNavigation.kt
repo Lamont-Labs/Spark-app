@@ -149,7 +149,22 @@ fun SparkNavigation(repository: ReflectionRepository) {
                     fadeOut(animationSpec = tween(100))
             },
             label = "Spark destination transition"
-        ) { active -@Composable
+        ) { active ->
+            when (active) {
+                Destination.TODAY -> TodayDestination(repository, resurfacingEnabled, focus, Modifier,
+                    onEdit = { editingKind = it }, onAffirm = { selected = Destination.AFFIRM.name })
+                Destination.JOURNAL -> JournalScreen(repository, Modifier)
+                Destination.AFFIRM -> AffirmScreen(Modifier)
+                Destination.YOU -> Column {
+                    TextButton(onClick = { privacyOpen = true }) { Text("Privacy & preferences") }
+                    ProgressScreen(repository)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun TodayDestination(
     repository: ReflectionRepository,
     resurfacingEnabled: Boolean,
@@ -304,23 +319,6 @@ private fun TodayQuickAction(
             Text(title, style = MaterialTheme.typography.titleMedium, color = SparkPalette.Ice)
             Text(subtitle, style = MaterialTheme.typography.bodySmall,
                 color = SparkPalette.MutedBlue, maxLines = 2)
-        }
-    }
-}
-
-       moment,
-                    modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = "Write ${moment.title}") {
-                        onEdit(if (moment.title == "Gratitude") "GRATITUDE" else "WIN")
-                    }
-                )
-            }
-        }
-        if (resurfacingEnabled) {
-            item { ResurfacingCard(repository) }
-        }
-        item {
-            Text("No pressure. No perfect days required.", style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
