@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -109,15 +112,33 @@ fun SparkGlassSurface(
         tonalElevation = 0.dp
     ) {
         Box(
-            modifier = Modifier.background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        accent.copy(alpha = if (prominent) 0.19f else 0.09f),
-                        SparkPalette.RaisedCard.copy(alpha = 0.74f),
-                        SparkPalette.NightCard
+            modifier = Modifier
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            accent.copy(alpha = if (prominent) 0.19f else 0.09f),
+                            SparkPalette.RaisedCard.copy(alpha = 0.74f),
+                            SparkPalette.NightCard
+                        )
                     )
                 )
-            )
+                .drawBehind {
+                    val highlight = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            accent.copy(alpha = if (prominent) 0.55f else 0.28f),
+                            Color.White.copy(alpha = if (prominent) 0.23f else 0.12f),
+                            Color.Transparent
+                        )
+                    )
+                    drawLine(
+                        brush = highlight,
+                        start = Offset(size.width * 0.07f, 1.dp.toPx()),
+                        end = Offset(size.width * 0.93f, 1.dp.toPx()),
+                        strokeWidth = 1.dp.toPx(),
+                        cap = StrokeCap.Round
+                    )
+                }
         ) {
             content()
         }
