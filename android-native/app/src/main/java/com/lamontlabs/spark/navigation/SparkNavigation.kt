@@ -162,10 +162,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
                     onEdit = { editingKind = it }, onAffirm = { selected = Destination.AFFIRM.name }, onJournal = { selected = Destination.JOURNAL.name })
                 Destination.JOURNAL -> JournalScreen(repository, Modifier)
                 Destination.AFFIRM -> AffirmScreen(Modifier)
-                Destination.YOU -> Column {
-                    TextButton(onClick = { privacyOpen = true }) { Text("Privacy & preferences") }
-                    ProgressScreen(repository)
-                }
+                Destination.YOU -> ProgressScreen(repository, onPrivacy = { privacyOpen = true })
             }
         }
     }
