@@ -2,6 +2,7 @@ package com.lamontlabs.spark.journal
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Brush
 import com.lamontlabs.spark.design.SparkPalette
 import com.lamontlabs.spark.design.SparkGlassSurface
@@ -23,6 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.StarOutline
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,8 +36,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -53,7 +60,9 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
     val stream = remember(repository) { repository.observeAll() }
     val reflections by stream.collectAsState(initial = emptyList())
     val dateFormat = remember { DateTimeFormatter.ofPattern("EEEE, MMMM d") }
-    val grouped = remember(reflections) { reflections.groupBy { it.reflectionDate } }
+    val grouped = remember(reflections) { reflections.groupBy { it.reflectionDate }.toSortedMap(compareByDescending { it }) }
+    var expandedDate by rememberSaveable { mutableStateOf<String?>(null) }
+    val activeDate = expandedDate ?: grouped.keys.firstOrNull()
     LazyColumn(
         modifier = modifier.fillMaxSize().background(SparkPalette.Void),
         contentPadding = PaddingValues(start = 22.dp, end = 22.dp, top = 28.dp, bottom = 40.dp),
@@ -91,11 +100,26 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
                 val readable = remember(date) {
                     runCatching { LocalDate.parse(date).format(dateFormat) }.getOrDefault(date)
                 }
-                Text(readable, style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 10.dp, bottom = 2.dp))
+                val expanded = activeDate == date
+                SparkGlassSurface(modifier = Modifier.fillMaxWidth()
+                    .clickable(role = Role.Button, onClickLabel = if (expanded) "Collapse $readable" else "Expand $readable") {
+                        expandedDate = if (expanded) "" else date
+                    }) {
+                    Row(modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(readable, style = MaterialTheme.typography.titleMedium,
+                                color = SparkPalette.Ice, fontWeight = FontWeight.SemiBold)
+                            Text("${entries.size} ${if (entries.size == 1) "moment" else "moments"}",
+                                style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+                        }
+                        Icon(if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                            contentDescription = null, tint = SparkPalette.Cyan)
+                    }
+                }
             }
+            if (activeDate == date) {
             items(entries, key = { it.id }) { reflection ->
                 val gratitude = reflection.kind == "GRATITUDE"
                 val accent = if (gratitude) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
@@ -140,6 +164,7 @@ fun JournalScreen(repository: ReflectionRepository, modifier: Modifier = Modifie
                         }
                     }
                 }
+            }
             }
         }
     }
