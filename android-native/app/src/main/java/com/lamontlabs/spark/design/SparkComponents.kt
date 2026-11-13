@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -83,6 +84,42 @@ fun SparkMomentCard(moment: SparkMoment, modifier: Modifier = Modifier) {
                 Text("TAP TO REFLECT", style = MaterialTheme.typography.labelSmall,
                     color = accent, letterSpacing = 1.1.sp)
             }
+        }
+    }
+}
+
+/**
+ * Reusable midnight glass layer. Uses native Compose gradients rather than
+ * blur or external render dependencies, keeping offline rendering deterministic.
+ */
+@Composable
+fun SparkGlassSurface(
+    modifier: Modifier = Modifier,
+    accent: Color = SparkPalette.Cyan,
+    prominent: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    val shape = RoundedCornerShape(if (prominent) 28.dp else 22.dp)
+    val edge = accent.copy(alpha = if (prominent) 0.42f else 0.22f)
+    Surface(
+        modifier = modifier,
+        shape = shape,
+        color = SparkPalette.NightCard,
+        border = BorderStroke(1.dp, edge),
+        tonalElevation = 0.dp
+    ) {
+        Box(
+            modifier = Modifier.background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        accent.copy(alpha = if (prominent) 0.19f else 0.09f),
+                        SparkPalette.RaisedCard.copy(alpha = 0.74f),
+                        SparkPalette.NightCard
+                    )
+                )
+            )
+        ) {
+            content()
         }
     }
 }
