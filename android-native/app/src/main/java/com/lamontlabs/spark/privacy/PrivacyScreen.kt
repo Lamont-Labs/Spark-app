@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import com.lamontlabs.spark.reminders.ReminderScheduler
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.mutableStateOf
@@ -152,27 +153,43 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("GENTLE REMINDERS", style = MaterialTheme.typography.labelSmall,
                     color = SparkPalette.Cyan)
-        Text("Gentle daily reminder", style = MaterialTheme.typography.titleMedium)
-        Text("Optional, local and never includes your journal text. Delivery time is approximate.", style = MaterialTheme.typography.bodySmall)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Daily reminder", style = MaterialTheme.typography.titleMedium,
+                    color = SparkPalette.Ice)
+                Text(if (remindersEnabled) "On · a gentle nudge" else "Off · entirely optional",
+                    style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+            }
+            Switch(checked = remindersEnabled, onCheckedChange = { next ->
+                if (next && Build.VERSION.SDK_INT >= 33) {
+                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else scope.launch {
+                    preferences.setRemindersEnabled(next)
+                    ReminderScheduler.configure(context, next, reminderHour)
+                }
+            })
+        }
+        Text("Choose a preferred time. Reminders stay local, never include journal text, and may arrive approximately.",
+            style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue)
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             listOf(9 to "Morning", 14 to "Afternoon", 19 to "Evening").forEach { (hour, label) ->
                 FilterChip(selected = reminderHour == hour, onClick = {
                     scope.launch {
                         preferences.setReminderHour(hour)
                         if (remindersEnabled) ReminderScheduler.configure(context, true, hour)
                     }
-                }, label = { Text(label) })
+                }, label = { Text(label) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = SparkPalette.Cyan,
+                        selectedLabelColor = SparkPalette.Void,
+                        labelColor = SparkPalette.MutedBlue
+                    ))
             }
         }
-        Switch(checked = remindersEnabled, onCheckedChange = { next ->
-            if (next && Build.VERSION.SDK_INT >= 33) {
-                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else scope.launch {
-                preferences.setRemindersEnabled(next)
-                ReminderScheduler.configure(context, next, reminderHour)
-            }
-        })
-        Text(if (remindersEnabled) "Reminders enabled" else "Reminders off", style = MaterialTheme.typography.bodySmall)
             }
         }
         SparkGlassSurface(modifier = Modifier.fillMaxWidth()) {
