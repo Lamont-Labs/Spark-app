@@ -2,6 +2,7 @@ package com.lamontlabs.spark.editor
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.lamontlabs.spark.data.ReflectionRepository
+import com.lamontlabs.spark.design.SparkGlassSurface
+import com.lamontlabs.spark.design.SparkPalette
+import androidx.compose.ui.text.font.FontWeight
 import com.lamontlabs.spark.prompts.PromptLibrary
 import com.lamontlabs.spark.media.PrivatePhotoStore
 import java.time.LocalDate
@@ -72,24 +76,30 @@ fun ReflectionEditor(
     val prompt = PromptLibrary.daily(kind, LocalDate.now())
     val label = if (kind == "GRATITUDE") "Gratitude" else "Daily Win"
     Column(
-        modifier = Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(SparkPalette.Void).imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Your $label", style = MaterialTheme.typography.headlineMedium)
+        Text("YOUR MOMENT  /  $label", style = MaterialTheme.typography.labelMedium, color = SparkPalette.Cyan)
+        Text(if (kind == "GRATITUDE") "Keep the good." else "Celebrate your progress.", style = MaterialTheme.typography.headlineLarge, color = SparkPalette.Ice, fontWeight = FontWeight.SemiBold)
         Text(
             if (kind == "GRATITUDE") "What are you grateful for today?"
             else "What did you accomplish, big or small?",
             style = MaterialTheme.typography.bodyLarge
         )
         if (prompt != null) {
-            Text("A gentle starting point", style = MaterialTheme.typography.labelLarge)
-            Text(prompt.text, style = MaterialTheme.typography.bodyLarge)
+            SparkGlassSurface(modifier = Modifier.fillMaxWidth(), prominent = true) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("A GENTLE STARTING POINT", style = MaterialTheme.typography.labelSmall, color = SparkPalette.Cyan)
+                    Text(prompt.text, style = MaterialTheme.typography.bodyLarge, color = SparkPalette.Ice)
+                }
+            }
         }
         OutlinedTextField(
             value = body,
             onValueChange = { body = it; error = null },
             label = { Text("Your reflection") },
             minLines = 4,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
             modifier = Modifier.fillMaxWidth(),
             enabled = !saving
         )
