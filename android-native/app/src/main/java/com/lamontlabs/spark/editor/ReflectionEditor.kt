@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -113,6 +116,7 @@ fun ReflectionEditor(
                     selected = mood == option,
                     onClick = { mood = if (mood == option) null else option },
                     label = { Text(option) },
+                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = SparkPalette.Cyan, selectedLabelColor = SparkPalette.Void, labelColor = SparkPalette.MutedBlue),
                     enabled = !saving
                 )
             }
@@ -121,7 +125,7 @@ fun ReflectionEditor(
             Text(if (selectedPhoto == null) "Attach a photo (optional)" else "Replace attached photo")
         }
         if (selectedPhoto != null) {
-            Text("Photo attached privately", style = MaterialTheme.typography.bodySmall)
+            Text("✓ Photo attached privately", style = MaterialTheme.typography.bodySmall, color = SparkPalette.Cyan)
             OutlinedButton(onClick = { selectedPhoto?.let { photoStore.delete(it) }; selectedPhoto = null }, enabled = !saving) {
                 Text("Remove photo")
             }
@@ -149,7 +153,7 @@ fun ReflectionEditor(
             },
             enabled = !saving,
             modifier = Modifier.fillMaxWidth()
-        ) { Text(if (saving) "Saving…" else "Save reflection") }
+        ) { if (saving) CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp) else Text("Save reflection") }
         OutlinedButton(
             onClick = onCancel,
             enabled = !saving,
