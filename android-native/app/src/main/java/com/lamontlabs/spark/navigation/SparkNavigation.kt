@@ -77,6 +77,7 @@ import com.lamontlabs.spark.design.SparkPalette
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Brush
 import com.lamontlabs.spark.design.SparkMomentCard
+import com.lamontlabs.spark.design.SparkGlassSurface
 
 private enum class Destination(val label: String) {
     TODAY("Today"), JOURNAL("Journal"), AFFIRM("Affirm"), YOU("You")
@@ -306,11 +307,8 @@ private fun TodayQuickAction(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Surface(
-        modifier = modifier.clickable(role = Role.Button, onClickLabel = title, onClick = onClick),
-        shape = RoundedCornerShape(22.dp),
-        color = SparkPalette.NightCard,
-        border = BorderStroke(1.dp, SparkPalette.Hairline.copy(alpha = 0.28f))
+    SparkGlassSurface(
+        modifier = modifier.clickable(role = Role.Button, onClickLabel = title, onClick = onClick)
     ) {
         Column(modifier = Modifier.padding(17.dp),
             verticalArrangement = Arrangement.spacedBy(9.dp)) {
