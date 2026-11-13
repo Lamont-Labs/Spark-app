@@ -19,6 +19,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowDown
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
@@ -41,6 +52,7 @@ private val affirmations = listOf(
 fun AffirmScreen(modifier: Modifier = Modifier) {
     val day = LocalDate.now().toEpochDay()
     val featured = affirmations[Math.floorMod(day, affirmations.size.toLong()).toInt()]
+    var libraryExpanded by rememberSaveable { mutableStateOf(false) }
     LazyColumn(
         modifier = modifier.fillMaxSize().background(SparkPalette.Void),
         contentPadding = PaddingValues(24.dp),
@@ -59,10 +71,31 @@ fun AffirmScreen(modifier: Modifier = Modifier) {
                 }
             }
         }
-        item { Text("Explore more", style = MaterialTheme.typography.titleLarge, color = SparkPalette.Ice) }
-        items(affirmations, key = { it }) { affirmation ->
-            SparkGlassSurface(modifier = Modifier.fillMaxWidth(), accent = SparkPalette.Electric) {
-                Text(affirmation, modifier = Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge, color = SparkPalette.Ice)
+        item {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text("Your affirmation library", style = MaterialTheme.typography.titleLarge,
+                        color = SparkPalette.Ice)
+                    Text("${affirmations.size} offline reminders", style = MaterialTheme.typography.bodySmall,
+                        color = SparkPalette.MutedBlue)
+                }
+                TextButton(onClick = { libraryExpanded = !libraryExpanded }) {
+                    Text(if (libraryExpanded) "Show less" else "Explore")
+                    Icon(
+                        if (libraryExpanded) Icons.AutoMirrored.Filled.KeyboardArrowUp
+                        else Icons.AutoMirrored.Filled.KeyboardArrowDown,
+                        contentDescription = null
+                    )
+                }
+            }
+        }
+        if (libraryExpanded) {
+            items(affirmations, key = { it }) { affirmation ->
+                SparkGlassSurface(modifier = Modifier.fillMaxWidth(), accent = SparkPalette.Electric) {
+                    Text(affirmation, modifier = Modifier.padding(20.dp),
+                        style = MaterialTheme.typography.bodyLarge, color = SparkPalette.Ice)
+                }
             }
         }
         item {
