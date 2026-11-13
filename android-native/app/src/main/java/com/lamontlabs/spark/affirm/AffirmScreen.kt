@@ -27,8 +27,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowDown
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -83,8 +83,8 @@ fun AffirmScreen(modifier: Modifier = Modifier) {
                 TextButton(onClick = { libraryExpanded = !libraryExpanded }) {
                     Text(if (libraryExpanded) "Show less" else "Explore")
                     Icon(
-                        if (libraryExpanded) Icons.AutoMirrored.Filled.KeyboardArrowUp
-                        else Icons.AutoMirrored.Filled.KeyboardArrowDown,
+                        if (libraryExpanded) Icons.Filled.KeyboardArrowUp
+                        else Icons.Filled.KeyboardArrowDown,
                         contentDescription = null
                     )
                 }
