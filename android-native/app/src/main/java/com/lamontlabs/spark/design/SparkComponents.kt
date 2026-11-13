@@ -1,7 +1,5 @@
 package com.lamontlabs.spark.design
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +10,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,15 +56,14 @@ fun SparkMomentCard(moment: SparkMoment, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth().heightIn(min = 160.dp),
         shape = RoundedCornerShape(28.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.24f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isAffirm) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surface
+            containerColor = SparkPalette.NightCard
         )
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 22.dp, vertical = 21.dp),
+            modifier = Modifier.background(Brush.linearGradient(listOf(accent.copy(alpha = 0.13f), SparkPalette.NightCard, SparkPalette.Midnight))).padding(horizontal = 22.dp, vertical = 21.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -77,9 +76,9 @@ fun SparkMomentCard(moment: SparkMoment, modifier: Modifier = Modifier) {
                     letterSpacing = 1.3.sp, color = accent, fontWeight = FontWeight.SemiBold)
             }
             Text(moment.title, style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                fontWeight = FontWeight.SemiBold, color = SparkPalette.Ice)
             Text(moment.description, style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 24.sp)
+                color = SparkPalette.MutedBlue, lineHeight = 24.sp)
             if (!isAffirm) {
                 Text("TAP TO REFLECT", style = MaterialTheme.typography.labelSmall,
                     color = accent, letterSpacing = 1.1.sp)
