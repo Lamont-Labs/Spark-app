@@ -19,6 +19,10 @@ import com.lamontlabs.spark.portability.ReflectionBackup
 import com.lamontlabs.spark.portability.PhotoArchive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.background
+import com.lamontlabs.spark.design.SparkPalette
+import com.lamontlabs.spark.design.SparkGlassSurface
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
@@ -116,10 +120,11 @@ fun PrivacyScreen(preferences: PrivacyPreferences, modifier: Modifier = Modifier
         }
     }
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+        modifier = modifier.fillMaxSize().background(SparkPalette.Void).verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Privacy & preferences", style = MaterialTheme.typography.headlineMedium)
+        Text("YOUR SPACE  /  PRIVACY", style = MaterialTheme.typography.labelMedium, color = SparkPalette.Cyan)
+        Text("Your data. Your choices.", style = MaterialTheme.typography.headlineLarge, color = SparkPalette.Ice, fontWeight = FontWeight.SemiBold)
         Text("Your reflections are saved in Spark's private app storage on this device.", style = MaterialTheme.typography.bodyLarge)
         androidx.compose.foundation.layout.Row(
             modifier = Modifier.fillMaxWidth(),
