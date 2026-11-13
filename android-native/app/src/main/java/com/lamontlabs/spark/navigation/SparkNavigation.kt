@@ -111,7 +111,7 @@ fun SparkNavigation(repository: ReflectionRepository) {
             NavigationBar(
                 containerColor = SparkPalette.Midnight,
                 tonalElevation = 0.dp,
-                modifier = Modifier.height(76.dp)
+                modifier = Modifier.height(68.dp)
             ) {
                 Destination.entries.forEach { item ->
                     NavigationBarItem(
@@ -128,12 +128,18 @@ fun SparkNavigation(repository: ReflectionRepository) {
                                 contentDescription = null
                             )
                         },
-                        label = { Text(item.label) },
+                        label = {
+                            Text(
+                                item.label,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1
+                            )
+                        },
                         alwaysShowLabel = true,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = SparkPalette.Void,
                             selectedTextColor = SparkPalette.Cyan,
-                            indicatorColor = SparkPalette.Cyan,
+                            indicatorColor = SparkPalette.Cyan.copy(alpha = 0.92f),
                             unselectedIconColor = SparkPalette.MutedBlue,
                             unselectedTextColor = SparkPalette.MutedBlue
                         )
