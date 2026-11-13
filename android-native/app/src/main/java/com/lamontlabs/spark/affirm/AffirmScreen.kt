@@ -1,5 +1,11 @@
 package com.lamontlabs.spark.affirm
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.material3.CardDefaults
+import com.lamontlabs.spark.design.SparkPalette
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,32 +41,35 @@ fun AffirmScreen(modifier: Modifier = Modifier) {
     val day = LocalDate.now().toEpochDay()
     val featured = affirmations[Math.floorMod(day, affirmations.size.toLong()).toInt()]
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().background(SparkPalette.Void),
         contentPadding = PaddingValues(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text("Words to carry", style = MaterialTheme.typography.headlineLarge)
-            Text("A quiet reminder for today", style = MaterialTheme.typography.bodyLarge)
+            Text("SPARK  /  AFFIRM", style = MaterialTheme.typography.labelMedium, color = SparkPalette.Cyan)
+            Text("Words to carry", style = MaterialTheme.typography.headlineLarge, color = SparkPalette.Ice)
+            Text("A quiet reminder for today", style = MaterialTheme.typography.bodyLarge, color = SparkPalette.MutedBlue)
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("TODAY'S AFFIRMATION", style = MaterialTheme.typography.labelMedium)
-                    Text(featured, style = MaterialTheme.typography.headlineSmall)
+            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(26.dp),
+                border = BorderStroke(1.dp, SparkPalette.Cyan.copy(alpha = 0.25f)),
+                colors = CardDefaults.cardColors(containerColor = SparkPalette.NightCard)) {
+                Column(modifier = Modifier.background(Brush.linearGradient(listOf(SparkPalette.RaisedCard, SparkPalette.NightCard))).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("TODAY'S AFFIRMATION", style = MaterialTheme.typography.labelMedium, color = SparkPalette.Cyan)
+                    Text(featured, style = MaterialTheme.typography.headlineSmall, color = SparkPalette.Ice)
                 }
             }
         }
-        item { Text("Explore more", style = MaterialTheme.typography.titleLarge) }
+        item { Text("Explore more", style = MaterialTheme.typography.titleLarge, color = SparkPalette.Ice) }
         items(affirmations, key = { it }) { affirmation ->
             Card(modifier = Modifier.fillMaxWidth()) {
-                Text(affirmation, modifier = Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge)
+                Text(affirmation, modifier = Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge, color = SparkPalette.Ice)
             }
         }
         item {
             Text(
                 "These affirmations are included with Spark and work offline. Custom affirmations are coming later.",
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall, color = SparkPalette.MutedBlue
             )
         }
     }
